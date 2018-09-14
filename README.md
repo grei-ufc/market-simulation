@@ -13,22 +13,27 @@ Developers who contribute to this project should follow the git working model ba
 To run the simulation the following steps should be performed:
 
 Download the simulation files contained in this repository by entering the following command in your terminal:
-
+    ```sh
     $ git clone https://github.com/grei-ufc/market-simulation.git
+    ```
 
 Then, enter the folder where the files were stored:
-    
+    ```sh
     $ cd market-simulation
+    ```
 
 It is advisable to run the simulation in a virtual python environment so there is no dependency conflict. It is also advised that Anaconda's package management, the conda, be used in creating and managing the virtual environment:
-
+    ```sh
     $ conda create --name = market1 python
     $ source activate market1
+    ```
 
 Once the python virtual environment has been activated, run the dependencies installation command:
-
+    ```sh
     $ pip install -r requirements.txt
+    ```
 
-Now, just run the simulation, using the launcher.py command
-
+Now, just run the simulation, using the launcher.py script
+    ```sh
     $ python launcher.py
+    ```
