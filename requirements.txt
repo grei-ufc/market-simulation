@@ -1,2 +1,4 @@
-pade==2.0.1
+pade==2.0.2
 mosaik==2.5.0
+enlopy==0.1.dev10
+numpy==1.15.1
