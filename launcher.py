@@ -16,3 +16,9 @@ sleep(10)
 
 p1.kill()
 p2.kill()
+
+commands = 'fuser -k 5000/tcp'
+commands = shlex.split(commands)
+p3 = subprocess.Popen(commands, stdin=subprocess.PIPE,)
+sleep(2)
+p3.kill()

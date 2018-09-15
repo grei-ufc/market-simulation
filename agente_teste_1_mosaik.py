@@ -39,8 +39,6 @@ class MosaikSim(MosaikCon):
         return entities_info
 
     def step(self, time, inputs):
-        print(time)
-        #print(inputs)
         if time % 1001 == 0 and time != 0:
             self.get_progress()
         if time % 2001 == 0 and time != 0:
@@ -69,7 +67,7 @@ class MosaikSim(MosaikCon):
 
 class AgenteHelloWorld(Agent):
     def __init__(self, aid):
-        super(AgenteHelloWorld, self).__init__(aid=aid, debug=True)
+        super(AgenteHelloWorld, self).__init__(aid=aid, debug=False)
         self.mosaik_sim = MosaikSim(self)
         display_message(self.aid.localname, 'Hello World!')
 
