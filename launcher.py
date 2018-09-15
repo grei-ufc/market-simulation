@@ -2,17 +2,17 @@ import subprocess
 import shlex
 from time import sleep
 
-commands = 'python agente_teste_1_mosaik.py'
+commands = 'python start_pade_agents.py'
 commands = shlex.split(commands)
-p1 = subprocess.Popen(commands, stdin=subprocess.PIPE,)
+p1 = subprocess.Popen(commands, stdin=subprocess.PIPE)
 
-sleep(3)
+sleep(3.0)
 
-commands = 'python first.py'
+commands = 'python start_mosaik_sim.py'
 commands = shlex.split(commands)
-p2 = subprocess.Popen(commands, stdin=subprocess.PIPE,)
+p2 = subprocess.Popen(commands, stdin=subprocess.PIPE)
 
-sleep(10)
+sleep(3.0)
 
 p1.kill()
 p2.kill()
@@ -20,5 +20,5 @@ p2.kill()
 commands = 'fuser -k 5000/tcp'
 commands = shlex.split(commands)
 p3 = subprocess.Popen(commands, stdin=subprocess.PIPE,)
-sleep(2)
+sleep(1.0)
 p3.kill()

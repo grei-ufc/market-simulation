@@ -14,10 +14,10 @@ from time import sleep
 MOSAIK_MODELS = {
     'api_version': '2.2',
     'models': {
-        'D': {
+        'DeviceAgent': {
             'public': True,
-            'params': ['init_val', 'medium_val'],
-            'attrs': ['val_in', 'val_out'],
+            'params': ['prosumers_id'],
+            'attrs': [],
         },
     },
 }
@@ -28,23 +28,23 @@ class MosaikSim(MosaikCon):
         super(MosaikSim, self).__init__(MOSAIK_MODELS, agent)
         self.entities = list()
 
-    def create(self, num, model, init_val, medium_val):
+
+    def init(self, sid, eid_prefix, start, step_size):
+        self.eid_prefix = eid_prefix
+        self.start = start
+        self.step_size = step_size
+        return MOSAIK_MODELS
+
+
+    def create(self, num, model):
         entities_info = list()
         for i in range(num):
-            self.entities.append(init_val)
-            print(init_val)
-            print(medium_val)
             entities_info.append(
                 {'eid': self.sim_id + '.' + str(i), 'type': model, 'rel': []})
         return entities_info
 
     def step(self, time, inputs):
-        if time % 1001 == 0 and time != 0:
-            self.get_progress()
-        if time % 2001 == 0 and time != 0:
-            data = {'ExampleSim-0.0.0': ['val_out']}
-            self.get_data_async(data)
-        return time + self.time_step
+        return time + self.step_size
 
     def handle_get_data(self, data):
         print(data)
@@ -53,7 +53,6 @@ class MosaikSim(MosaikCon):
         print('sucess in set_data process')
 
     def handle_get_progress(self, progress):
-        print('------------')
         print(progress)
 
     def get_data(self, outputs):
@@ -65,27 +64,9 @@ class MosaikSim(MosaikCon):
         return response
 
 
-class AgenteHelloWorld(Agent):
+
+class DeviceAgent(Agent):
     def __init__(self, aid):
-        super(AgenteHelloWorld, self).__init__(aid=aid, debug=False)
+        super(DeviceAgent, self).__init__(aid=aid, debug=False)
         self.mosaik_sim = MosaikSim(self)
-        display_message(self.aid.localname, 'Hello World!')
 
-
-def config_agents():
-
-    agents = list()
-
-    agente_hello = AgenteHelloWorld(AID(name='agente_hello@localhost:1234'))
-    agents.append(agente_hello)
-
-    s = PadeSession()
-    s.add_all_agents(agents)
-    s.register_user(username='lucassm', email='lucas@gmail.com', password='12345')
-
-    return s
-
-if __name__ == '__main__':
-
-    s = config_agents()
-    s.start_loop()
