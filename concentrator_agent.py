@@ -11,15 +11,16 @@ from pade.acl.messages import ACLMessage
 from pade.behaviours.protocols import FipaRequestProtocol
 from pade.behaviours.protocols import TimedBehaviour
 from pade.drivers.mosaik_driver import MosaikCon
+
 from time import sleep
 
 MOSAIK_MODELS = {
     'api_version': '2.2',
     'models': {
-        'DeviceAgent': {
+        'ConcentratorAgent': {
             'public': True,
             'params': ['prosumers_id'],
-            'attrs': ['power_forecast'],
+            'attrs': [],
         },
     },
 }
@@ -46,17 +47,6 @@ class MosaikSim(MosaikCon):
         return entities_info
 
     def step(self, time, inputs):
-        
-        # Comportamento a cada 25 min
-        if time % (25 * 60) == 0 and time != 0:
-            message = ACLMessage(ACLMessage.REQUEST)
-            message.set_protocol(ACLMessage.FIPA_REQUEST_PROTOCOL)
-            message.add_receiver(AID(name='concentrator'))
-            message.set_content('communication')
-            comp = SendInformToAgentConcentrator(self.agent, message)
-            self.agent.behaviours.append(comp)
-            comp.on_start()
-            print(self.agent.agentInstance.table)
         return time + self.step_size
 
     # def handle_get_data(self, data):
@@ -76,21 +66,22 @@ class MosaikSim(MosaikCon):
                 response[model][value] = 1.0
         return response
 
-
-class SendInformToAgentConcentrator(FipaRequestProtocol):
+class ReceiveInformFromAgentDevice(FipaRequestProtocol):
     """Comportamento FIPA Request
     do agente Relogio"""
-    def __init__(self, agent, message):
-        super(SendInformToAgentConcentrator, self).__init__(agent=agent,
-                                                            message=message,
-                                                            is_initiator=True)
+    def __init__(self, agent):
+        super(ReceiveInformFromAgentDevice, self).__init__(agent=agent,
+                                                           message=None,
+                                                           is_initiator=False)
 
-    def handle_inform(self, message):
+    def handle_request(self, message):
         display_message(self.agent.aid.localname, message.content)
 
-
-class DeviceAgent(Agent):
+class ConcentratorAgent(Agent):
     def __init__(self, aid):
-        super(DeviceAgent, self).__init__(aid=aid, debug=False)
+        super(ConcentratorAgent, self).__init__(aid=aid, debug=False)
         self.mosaik_sim = MosaikSim(self)
 
+        # Behaviours
+        behaviour_1 = ReceiveInformFromAgentDevice(self)
+        self.behaviours.append(behaviour_1)

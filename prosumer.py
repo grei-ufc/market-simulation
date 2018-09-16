@@ -164,6 +164,8 @@ class Prosumer(object):
 
         self.load_demand = self.load.step(datetime)
 
+        self.forecast(datetime)
+
         # verifica se o consumidor tem recursos energéticos distribuídos
         if self.has_der:
             self.generation_power = self.generation.step(datetime)
@@ -275,7 +277,6 @@ class Simulator(object):
 
         for i, prosumer in enumerate(self.prosumers):
             prosumer.step(datetime)
-            prosumer.forecast(datetime)
             data = {'datetime': datetime.strftime('%D - %T'),
                     'load_demand': prosumer.load_demand,
                     'generation_power': prosumer.generation_power,
