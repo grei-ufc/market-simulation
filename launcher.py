@@ -6,13 +6,13 @@ commands = 'python start_pade_agents.py'
 commands = shlex.split(commands)
 p1 = subprocess.Popen(commands, stdin=subprocess.PIPE)
 
-sleep(3.0)
+sleep(5.0)
 
 commands = 'python start_mosaik_sim.py'
 commands = shlex.split(commands)
 p2 = subprocess.Popen(commands, stdin=subprocess.PIPE)
 
-sleep(3.0)
+sleep(7.0)
 
 p1.kill()
 p2.kill()
@@ -22,3 +22,4 @@ commands = shlex.split(commands)
 p3 = subprocess.Popen(commands, stdin=subprocess.PIPE,)
 sleep(1.0)
 p3.kill()
+

@@ -16,7 +16,7 @@ SIM_CONFIG = {
 QTD_HOURS = 1
 
 START = '12/03/2018 - 00:00:00'
-END = QTD_HOURS * 60 * 60
+END = int(QTD_HOURS * 60 * 60)
 
 world = mosaik.World(SIM_CONFIG)
 
@@ -66,9 +66,13 @@ prosumers = prosumer_sim.Prosumer.create(len(prosumers_id), prosumers_id=prosume
 
 device_agents = device_agent_sim.DeviceAgent.create(len(prosumers_id))
 
-# for i, j, k in zip(a, b, d):
-#     world.connect(i, j, ('val_out', 'val_in'), async_requests=True)
-#     #world.connect(j, k, ('val_out', 'val_in'))
-#     world.connect(i, k, ('val_out', 'val_in'), async_requests=True)
+# ---------------------------------------
+# connect the prosumers model to a device 
+# agent.
+# ---------------------------------------
+
+for prosumer, device_agent in zip(prosumers, device_agents):
+    # world.connect(customer, market, 'order', async_requests=True)
+    world.connect(prosumer, device_agent, 'power_forecast', async_requests=True)
 
 world.run(until=END)
