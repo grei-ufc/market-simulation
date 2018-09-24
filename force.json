@@ -39,8 +39,8 @@
             "name": 4,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.175,
-            "reactive_power": 1.175,
+            "active_power": 1.198,
+            "reactive_power": 1.198,
             "phase": "a",
             "id": 4
         },
@@ -48,8 +48,8 @@
             "name": 5,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.191,
-            "reactive_power": 1.191,
+            "active_power": 0.777,
+            "reactive_power": 0.777,
             "phase": "c",
             "id": 5
         },
@@ -57,44 +57,44 @@
             "name": 6,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.175,
-            "reactive_power": 1.175,
-            "phase": "b",
+            "active_power": 0.884,
+            "reactive_power": 0.884,
+            "phase": "a",
             "id": 6
         },
         {
             "name": 7,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.208,
-            "reactive_power": 1.208,
-            "phase": "b",
+            "active_power": 1.163,
+            "reactive_power": 1.163,
+            "phase": "c",
             "id": 7
         },
         {
             "name": 8,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.025,
-            "reactive_power": 1.025,
-            "phase": "a",
+            "active_power": 1.212,
+            "reactive_power": 1.212,
+            "phase": "b",
             "id": 8
         },
         {
             "name": 9,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.131,
-            "reactive_power": 1.131,
-            "phase": "b",
+            "active_power": 1.14,
+            "reactive_power": 1.14,
+            "phase": "c",
             "id": 9
         },
         {
             "name": 10,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.951,
-            "reactive_power": 0.951,
+            "active_power": 1.085,
+            "reactive_power": 1.085,
             "phase": "a",
             "id": 10
         },
@@ -102,8 +102,8 @@
             "name": 11,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.978,
-            "reactive_power": 0.978,
+            "active_power": 0.906,
+            "reactive_power": 0.906,
             "phase": "c",
             "id": 11
         },
@@ -111,8 +111,8 @@
             "name": 12,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.881,
-            "reactive_power": 0.881,
+            "active_power": 1.159,
+            "reactive_power": 1.159,
             "phase": "a",
             "id": 12
         },
@@ -120,26 +120,26 @@
             "name": 13,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.252,
-            "reactive_power": 1.252,
-            "phase": "b",
+            "active_power": 0.758,
+            "reactive_power": 0.758,
+            "phase": "c",
             "id": 13
         },
         {
             "name": 14,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.163,
-            "reactive_power": 1.163,
-            "phase": "c",
+            "active_power": 1.005,
+            "reactive_power": 1.005,
+            "phase": "b",
             "id": 14
         },
         {
             "name": 15,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.711,
-            "reactive_power": 0.711,
+            "active_power": 1.223,
+            "reactive_power": 1.223,
             "phase": "a",
             "id": 15
         },
@@ -147,8 +147,8 @@
             "name": 16,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.762,
-            "reactive_power": 0.762,
+            "active_power": 0.89,
+            "reactive_power": 0.89,
             "phase": "a",
             "id": 16
         },
@@ -156,44 +156,44 @@
             "name": 17,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.813,
-            "reactive_power": 0.813,
-            "phase": "c",
+            "active_power": 0.976,
+            "reactive_power": 0.976,
+            "phase": "a",
             "id": 17
         },
         {
             "name": 18,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.063,
-            "reactive_power": 1.063,
-            "phase": "b",
+            "active_power": 0.783,
+            "reactive_power": 0.783,
+            "phase": "a",
             "id": 18
         },
         {
             "name": 19,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.815,
-            "reactive_power": 0.815,
-            "phase": "b",
+            "active_power": 0.747,
+            "reactive_power": 0.747,
+            "phase": "a",
             "id": 19
         },
         {
             "name": 20,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.968,
-            "reactive_power": 0.968,
-            "phase": "c",
+            "active_power": 0.97,
+            "reactive_power": 0.97,
+            "phase": "b",
             "id": 20
         },
         {
             "name": 21,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.301,
-            "reactive_power": 1.301,
+            "active_power": 0.944,
+            "reactive_power": 0.944,
             "phase": "c",
             "id": 21
         },
@@ -201,17 +201,17 @@
             "name": 22,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.785,
-            "reactive_power": 0.785,
-            "phase": "b",
+            "active_power": 1.222,
+            "reactive_power": 1.222,
+            "phase": "c",
             "id": 22
         },
         {
             "name": 23,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.763,
-            "reactive_power": 0.763,
+            "active_power": 0.972,
+            "reactive_power": 0.972,
             "phase": "a",
             "id": 23
         },
@@ -219,17 +219,17 @@
             "name": 24,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.739,
-            "reactive_power": 0.739,
-            "phase": "c",
+            "active_power": 0.791,
+            "reactive_power": 0.791,
+            "phase": "a",
             "id": 24
         },
         {
             "name": 25,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.893,
-            "reactive_power": 0.893,
+            "active_power": 0.744,
+            "reactive_power": 0.744,
             "phase": "a",
             "id": 25
         },
@@ -237,8 +237,8 @@
             "name": 26,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.848,
-            "reactive_power": 0.848,
+            "active_power": 0.818,
+            "reactive_power": 0.818,
             "phase": "b",
             "id": 26
         },
@@ -246,17 +246,17 @@
             "name": 27,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.285,
-            "reactive_power": 1.285,
-            "phase": "b",
+            "active_power": 0.962,
+            "reactive_power": 0.962,
+            "phase": "c",
             "id": 27
         },
         {
             "name": 28,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.094,
-            "reactive_power": 1.094,
+            "active_power": 0.942,
+            "reactive_power": 0.942,
             "phase": "c",
             "id": 28
         },
@@ -264,35 +264,71 @@
             "name": 29,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.851,
-            "reactive_power": 0.851,
-            "phase": "c",
+            "active_power": 0.726,
+            "reactive_power": 0.726,
+            "phase": "a",
             "id": 29
         },
         {
             "name": 30,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 1.181,
-            "reactive_power": 1.181,
-            "phase": "b",
+            "active_power": 1.12,
+            "reactive_power": 1.12,
+            "phase": "a",
             "id": 30
         },
         {
             "name": 31,
             "color": "rgb(255, 127, 14)",
             "voltage_level": "low voltage",
-            "active_power": 0.927,
-            "reactive_power": 0.927,
-            "phase": "b",
+            "active_power": 0.917,
+            "reactive_power": 0.917,
+            "phase": "a",
             "id": 31
+        },
+        {
+            "name": 32,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.116,
+            "reactive_power": 1.116,
+            "phase": "a",
+            "id": 32
+        },
+        {
+            "name": 33,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.24,
+            "reactive_power": 1.24,
+            "phase": "c",
+            "id": 33
+        },
+        {
+            "name": 34,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.074,
+            "reactive_power": 1.074,
+            "phase": "c",
+            "id": 34
+        },
+        {
+            "name": 35,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.29,
+            "reactive_power": 1.29,
+            "phase": "a",
+            "id": 35
         }
     ],
     "links": [
         {
             "name": "Section_0_1",
             "type": "line",
-            "length": 0.053,
+            "length": 0.095,
             "switch": "sw_1",
             "source": 0,
             "target": 1
@@ -300,7 +336,7 @@
         {
             "name": "Section_1_2",
             "type": "line",
-            "length": 0.062,
+            "length": 0.075,
             "switch": null,
             "source": 1,
             "target": 2
@@ -308,7 +344,7 @@
         {
             "name": "Section_2_3",
             "type": "line",
-            "length": 0.057,
+            "length": 0.059,
             "switch": null,
             "source": 2,
             "target": 3
@@ -321,64 +357,72 @@
             "target": 4
         },
         {
-            "name": "Section_3_12",
+            "name": "Section_3_16",
             "type": "transformer",
             "switch": null,
             "source": 3,
-            "target": 12
+            "target": 16
         },
         {
             "name": "Section_4_5",
             "type": "line",
-            "length": 0.009,
+            "length": 0.007,
             "switch": null,
             "source": 4,
             "target": 5
         },
         {
-            "name": "Section_4_6",
+            "name": "Section_5_6",
             "type": "line",
-            "length": 0.007,
+            "length": 0.008,
             "switch": null,
-            "source": 4,
+            "source": 5,
             "target": 6
+        },
+        {
+            "name": "Section_5_11",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 5,
+            "target": 11
+        },
+        {
+            "name": "Section_5_12",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 5,
+            "target": 12
         },
         {
             "name": "Section_6_7",
             "type": "line",
-            "length": 0.006,
+            "length": 0.007,
             "switch": null,
             "source": 6,
             "target": 7
         },
         {
-            "name": "Section_7_8",
-            "type": "line",
-            "length": 0.009,
-            "switch": null,
-            "source": 7,
-            "target": 8
-        },
-        {
-            "name": "Section_7_9",
+            "name": "Section_6_8",
             "type": "line",
             "length": 0.007,
             "switch": null,
-            "source": 7,
-            "target": 9
+            "source": 6,
+            "target": 8
         },
         {
-            "name": "Section_7_11",
+            "name": "Section_6_9",
             "type": "line",
-            "length": 0.01,
+            "length": 0.006,
             "switch": null,
-            "source": 7,
-            "target": 11
+            "source": 6,
+            "target": 9
         },
         {
             "name": "Section_9_10",
             "type": "line",
-            "length": 0.009,
+            "length": 0.007,
             "switch": null,
             "source": 9,
             "target": 10
@@ -386,87 +430,79 @@
         {
             "name": "Section_12_13",
             "type": "line",
-            "length": 0.007,
+            "length": 0.008,
             "switch": null,
             "source": 12,
             "target": 13
         },
         {
-            "name": "Section_12_15",
-            "type": "line",
-            "length": 0.009,
-            "switch": null,
-            "source": 12,
-            "target": 15
-        },
-        {
             "name": "Section_13_14",
             "type": "line",
-            "length": 0.006,
+            "length": 0.009,
             "switch": null,
             "source": 13,
             "target": 14
         },
         {
-            "name": "Section_15_16",
+            "name": "Section_14_15",
             "type": "line",
             "length": 0.007,
             "switch": null,
-            "source": 15,
-            "target": 16
-        },
-        {
-            "name": "Section_15_18",
-            "type": "line",
-            "length": 0.007,
-            "switch": null,
-            "source": 15,
-            "target": 18
-        },
-        {
-            "name": "Section_15_21",
-            "type": "line",
-            "length": 0.007,
-            "switch": null,
-            "source": 15,
-            "target": 21
+            "source": 14,
+            "target": 15
         },
         {
             "name": "Section_16_17",
             "type": "line",
-            "length": 0.009,
+            "length": 0.008,
             "switch": null,
             "source": 16,
             "target": 17
         },
         {
-            "name": "Section_18_19",
+            "name": "Section_17_18",
             "type": "line",
             "length": 0.008,
             "switch": null,
-            "source": 18,
+            "source": 17,
+            "target": 18
+        },
+        {
+            "name": "Section_17_19",
+            "type": "line",
+            "length": 0.006,
+            "switch": null,
+            "source": 17,
             "target": 19
         },
         {
-            "name": "Section_18_20",
+            "name": "Section_19_20",
             "type": "line",
             "length": 0.008,
             "switch": null,
-            "source": 18,
+            "source": 19,
             "target": 20
         },
         {
-            "name": "Section_21_22",
+            "name": "Section_20_21",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 20,
+            "target": 21
+        },
+        {
+            "name": "Section_20_22",
             "type": "line",
             "length": 0.007,
             "switch": null,
-            "source": 21,
+            "source": 20,
             "target": 22
         },
         {
             "name": "Section_22_23",
             "type": "line",
-            "length": 0.007,
+            "length": 0.009,
             "switch": null,
             "source": 22,
             "target": 23
@@ -482,7 +518,7 @@
         {
             "name": "Section_24_25",
             "type": "line",
-            "length": 0.008,
+            "length": 0.007,
             "switch": null,
             "source": 24,
             "target": 25
@@ -490,7 +526,7 @@
         {
             "name": "Section_24_26",
             "type": "line",
-            "length": 0.006,
+            "length": 0.01,
             "switch": null,
             "source": 24,
             "target": 26
@@ -498,7 +534,7 @@
         {
             "name": "Section_26_27",
             "type": "line",
-            "length": 0.01,
+            "length": 0.008,
             "switch": null,
             "source": 26,
             "target": 27
@@ -506,34 +542,66 @@
         {
             "name": "Section_27_28",
             "type": "line",
-            "length": 0.008,
+            "length": 0.01,
             "switch": null,
             "source": 27,
             "target": 28
         },
         {
-            "name": "Section_28_29",
+            "name": "Section_27_29",
             "type": "line",
-            "length": 0.006,
+            "length": 0.009,
             "switch": null,
-            "source": 28,
+            "source": 27,
             "target": 29
         },
         {
-            "name": "Section_28_30",
+            "name": "Section_27_31",
             "type": "line",
-            "length": 0.01,
+            "length": 0.009,
             "switch": null,
-            "source": 28,
+            "source": 27,
+            "target": 31
+        },
+        {
+            "name": "Section_29_30",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 29,
             "target": 30
         },
         {
-            "name": "Section_30_31",
+            "name": "Section_29_32",
             "type": "line",
-            "length": 0.007,
+            "length": 0.008,
             "switch": null,
-            "source": 30,
-            "target": 31
+            "source": 29,
+            "target": 32
+        },
+        {
+            "name": "Section_32_33",
+            "type": "line",
+            "length": 0.006,
+            "switch": null,
+            "source": 32,
+            "target": 33
+        },
+        {
+            "name": "Section_32_35",
+            "type": "line",
+            "length": 0.006,
+            "switch": null,
+            "source": 32,
+            "target": 35
+        },
+        {
+            "name": "Section_33_34",
+            "type": "line",
+            "length": 0.008,
+            "switch": null,
+            "source": 33,
+            "target": 34
         }
     ],
     "transformes": [
@@ -544,10 +612,10 @@
             "power": 112.5
         },
         {
-            "name": "trafo_3_12",
+            "name": "trafo_3_16",
             "source": 3,
-            "target": 12,
-            "power": 225.0
+            "target": 16,
+            "power": 45.0
         }
     ]
 }

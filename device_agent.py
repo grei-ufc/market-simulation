@@ -47,8 +47,9 @@ class MosaikSim(MosaikCon):
 
     def step(self, time, inputs):
         
-        # Comportamento a cada 25 min
-        if time % (25 * 60) == 0 and time != 0:
+        # Comportamento a cada 5 min
+        if time % (5 * 60) == 0 and time != 0:
+            print(inputs)
             message = ACLMessage(ACLMessage.REQUEST)
             message.set_protocol(ACLMessage.FIPA_REQUEST_PROTOCOL)
             message.add_receiver(AID(name='concentrator'))
@@ -56,7 +57,6 @@ class MosaikSim(MosaikCon):
             comp = SendInformToAgentConcentrator(self.agent, message)
             self.agent.behaviours.append(comp)
             comp.on_start()
-            print(self.agent.agentInstance.table)
         return time + self.step_size
 
     # def handle_get_data(self, data):

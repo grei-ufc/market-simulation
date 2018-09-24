@@ -13,7 +13,11 @@ import enlopy as el
 import numpy as np
 
 def generate_timeseries(start, time, step):
-
+    '''
+        start = string em formato datetime: dd/mm/YYYY - hh:mm:ss
+        time = tamanho da série temporal em segundos
+        step = step de tempo em minutos
+    '''
     time_step = step * 60 # seconds
     dt_start = dt.datetime.strptime(start, '%d/%m/%Y - %H:%M:%S')
     delta = dt.timedelta(0, time)
@@ -24,21 +28,79 @@ def generate_timeseries(start, time, step):
     # res_pp = [i.strftime('%D - %T') for i in res]
     return res
 
+class ShiftableLoad(object):
 
-class Load(object):
+    OFF = 0
+    ON = 1
+
+    def __init__(self, datetime, start_datetime, demand, time_delta):
+        '''
+            datetime = string em formato datetime: dd/mm/YYYY - hh:mm:ss
+            start_time = string em formato datetime: dd/mm/YYYY - hh:mm:ss
+            demand = valor de demanda da carga em kva
+            time_in_hours = time delta de tempo de execução da carga
+
+            ======= Script de Testes ================
+            datetimes = generate_timeseries('24/09/2018 - 00:00:00', 72*60*60, 5)
+            sl1 = ShiftableLoad('24/09/2018 - 00:00:00', '24/09/2018 - 10:00:00', 2.0, dt.timedelta(hours=0.5))
+            for datetime in datetimes:
+                sl1.step(datetime)
+        '''
+        self.datetime = dt.datetime.strptime(datetime, '%d/%m/%Y - %H:%M:%S')
+        self.start_datetime = dt.datetime.strptime(start_datetime, '%d/%m/%Y - %H:%M:%S')
+        self.demand = demand
+        self.time_delta = time_delta
+        self.status = self.OFF
+        self.executed_today = False
+        self.time_left_in_sec = self.time_delta.seconds
+
+
+    def step(self, datetime):
+        exec_time = 0.0
+        if self.status == self.OFF:
+            if (datetime >= self.start_datetime) and (not self.executed_today):
+                self.status = self.ON
+            else:
+                if (datetime.day == self.start_datetime.day) and (self.executed_today):
+                    self.executed_today = False
+                    self.time_left_in_sec = self.time_delta.seconds
+
+        if self.status == self.ON:
+            self.delta = datetime - self.datetime
+            if self.delta.seconds <= self.time_left_in_sec:
+                self.time_left_in_sec -= self.delta.seconds
+                exec_time = self.delta.seconds
+            else:
+                exec_time = self.time_left_in_sec
+                self.time_left_in_sec = 0
+                self.executed_today = True
+                self.start_datetime += dt.timedelta(hours=24)
+                self.status = self.OFF
+            
+        self.datetime = datetime
+        energy = self.demand * (exec_time / (60.0 * 60.0))
+        
+        if energy != 0.0:
+            print('Load Executed: {:.2f} in {}'.format(energy, datetime))
+        return round(energy, 2)
+
+
+class UserLoad(object):
     """Representa uma classe que a cada passo
     de tempo retorna a demanda média de energia 
     para um determinado período de tempo.
     """
-    def __init__(self, start_datetime):
+    def __init__(self, datetime, user_daily_energy):
+
         self.demand = 0.0
-        self.start_datetime = start_datetime
-        self.datetime = self.start_datetime
+        self.datetime = datetime
 
         # definição da curva de carga do consumidor
-        self.load_curve = el.gen_daily_stoch_el(uniform(5.0, 10.0))
+        self.load_curve = el.gen_daily_stoch_el(user_daily_energy)
 
-    def step(self, datetime):
+    def step(self, datetime, commands):
+        '''
+        '''
         delta_de_tempo = datetime - self.datetime
         delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
 
@@ -60,30 +122,61 @@ class Load(object):
         return 'Load'
 
 
-class Generation(object):
+class DieselGeneration(object):
+
+    OFF = 0
+    ON = 1
+
+    def __init__(self, datetime, power_kva):
+        self.datetime = datetime
+        self.power_kva = power_kva
+        self.status = self.OFF
+
+
+    def step(self, datetime):
+        exec_time = 0.0
+
+        if self.status == self.ON:
+            self.delta = datetime - self.datetime
+            if self.delta.seconds <= self.time_left_in_sec:
+                self.time_left_in_sec -= self.delta.seconds
+                exec_time = self.delta.seconds
+            else:
+                exec_time = self.time_left_in_sec
+                self.time_left_in_sec = 0
+                self.start_datetime += dt.timedelta(hours=24)
+                self.status = self.OFF
+            
+        self.datetime = datetime
+        energy = self.power_kva * (exec_time / (60.0 * 60.0))
+        
+        if energy != 0.0:
+            print('Generation Executed: {:.2f} kVA in {}'.format(energy, datetime))
+        return round(energy, 2)
+
+
+class PVGeneration(object):
     """Representa uma classe que a cada passo
     de tempo retorna a produção média de energia 
     para um determinado período de tempo.
     """
-    def __init__(self, start_datetime):
-        self.power = 0.0
-        self.start_datetime = start_datetime
-        self.datetime = self.start_datetime
+    def __init__(self, datetime, power_kva):
+        self.power_kva = power_kva
+        self.datetime = datetime
 
     def step(self, datetime):
         delta_de_tempo = datetime - self.datetime
         delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
-
         self.datetime = datetime
 
         if datetime.hour >= 18 or datetime.hour < 6:
-            self.power = 0.0
+            self.power_kva = 0.0
         else:
-            self.power = round(uniform(0.2, 1.2), 3)
-
-        self.energy = round(self.power * delta_em_horas, 3)
+            self.power_kva = round(uniform(0.2, 1.2), 3)
         
-        return self.power
+        self.energy = round(self.power_kva * delta_em_horas, 3)
+        
+        return self.power_kva
 
     def forecast(self, datetime):
         if datetime.hour >= 18 or datetime.hour < 7:
@@ -108,12 +201,12 @@ class Storage(object):
     LOADING = 1
     UNLOADING = 0
 
-    def __init__(self, start_datetime):
+    def __init__(self, datetime, power_kva, max_storage_kwh=10.0):
         self.energy = 0.0
-        self.max_storage = 10.0
+        self.max_storage = max_storage
+        self.power_kva = power_kva
         self.state = self.LOADING
-        self.start_datetime = start_datetime
-        self.datetime = self.start_datetime
+        self.datetime = self.datetime
 
     def step(self, energy):
         self.energy += round(energy, 3)
@@ -129,21 +222,81 @@ class Storage(object):
         return 'Storage'
 
 
+class BufferingDevice(object):
+
+    def __init__(self, datetime, power_kva):
+        self.datetime = datetime
+        self.power_kva = power_kva
+
+    def step(self, datetime):
+        pass
+
+
 class Prosumer(object):
     """Esta classe implementa a lógica de consumo/produção
     de energia para cada passo de tempo de um prosumidor
     utilizando para isso instâncias das demais classes
     deste módulo, tais como Load, Generation e Storage
     """
-    def __init__(self, start_datetime, has_der=True):
-        self.start_datetime = start_datetime
-        self.datetime = self.start_datetime
-        self.load = Load(self.start_datetime)
-        self.has_der = has_der
+    def __init__(self, datetime, config):
+        '''
+            config is a dictionary like this:
+            {
+                'stochastic_gen': {
+                    'value': value 
+                },
+                'shiftable_load': {
+                    'value' : value
+                },
+                'buffering_device': {
+                    'value': value
+                }
+                'storage_device': {
+                    'value': value
+                }
+                'freely_control_gem': {
+                    'value': value
+                }
+                'user_action_device': {
+                    'value': value
+                }
+            }
+        '''
+        self.datetime = self.datetime
+        self.load = Load(self.datetime)
+
+        self.stochastic_gen = None
+        self.shiftable_load = None
+        self.buffering_device = None
+        self.storage_device = None
+        self.freely_control_gem = None
+        self.user_action_device = None
+
+        for device_name, device_values in config.items():
+            if device_name == 'stochastic_gen':
+                self.stochastic_gen = PVGeneration(datetime=datetime,
+                                                   power_kva=device_values['value'])
+            elif device_name == 'shiftable_load':
+                self.shiftable_load = ShiftableLoad(datetime=datetime,
+                                                    start_datetime=datetime,
+                                                    demand=device_values['value'],
+                                                    time_delta=0.5)
+            elif device_name == 'buffering_device':
+                self.shiftable_load = BufferingDevice(datetime=datetime,
+                                                      power_kva=device_values['value'])
+            elif device_name == 'storage_device':
+                self.storage_device = Storage(datetime=datetime,
+                                              power_kva=device_values['value'])
+            elif device_name == 'freely_control_gem':
+                self.freely_control_gem = DieselGeneration(datetime=datetime,
+                                                           power_kva=device_values['value'])
+            elif device_name == 'user_action_device':
+                self.user_action_device = UserLoad(datetime=datetime,
+                                                   user_daily_energy=device_values['value'])
 
         if self.has_der:
-            self.generation = Generation(self.start_datetime)
-            self.storage = Storage(self.start_datetime)
+            self.generation = Generation(self.datetime)
+            self.storage = Storage(self.datetime)
         else:
             self.generation = None
             self.storage = None
@@ -171,57 +324,6 @@ class Prosumer(object):
             self.generation_power = self.generation.step(datetime)
             self.power_input = 0.0
             self.power_input += self.load.demand - self.generation_power
-            # ################################################
-            # #   LÓGICA DE GERENCIMENTO DO ARMAZENAMENTO    #
-            # ################################################
-            # # No estado de descarga do sistema de armazenamento
-            # # a carga é dividida pela metade entre a rede e
-            # # o sistema de armazenamento até o limite de 40% de
-            # # carga do sistema de armazenamento.
-            # if  self.storage.state == 0: # unloading
-            #         energy_from_storage = self.load.energy / 2.0
-            #         self.power_input += self.load.demand / 2.0
-                    
-            #         # verifica se o sistema de armazenamento é capaz de
-            #         # suprir a energia solicitada pela carga
-            #         if (self.storage.energy - energy_from_storage) > 0.0:
-            #             self.storage.energy -= energy_from_storage
-            #         # caso o sistema de aramazenamento tenha menos energia
-            #         # armazenada que o suficiente para suprir a solicitacao da carga
-            #         # a energia na bateria é zerada e o restante de energia necessaria
-            #         # para suprir a carga é fornecida pela rede
-            #         else:
-            #             self.power_input += (energy_from_storage - self.storage.energy) / delta_em_horas
-            #             self.storage.energy = 0.0
-            # # no estado de carga do sistema de armazenamento
-            # # a energia gerada é utilizada totalmente para carregar
-            # # o sistema de armazenamento. Caso este já esteja com
-            # # 100% de carga, a energia gerada é utilizada para
-            # # suprir a carga e diminuir o consumo da rede. Caso
-            # # a geracao exceda a carga, o excedente é injetado na
-            # # rede elétrica. 
-            # elif self.storage.state == 1: # loading
-            #     generation_energy = self.generation.power * delta_em_horas
-            #     # verifica se o armazenamento esta 100% carregado.
-            #     if self.storage.energy < self.storage.max_storage:
-            #         # verifica se a energia gerada no periodo ira
-            #         # carregar o sistema de armazenameto e gerar excedente. 
-            #         if self.storage.max_storage - self.storage.energy > generation_energy:
-            #             self.storage.energy += generation_energy
-            #             self.power_input += self.load.demand
-            #         # caso haja excedente este excedente é utilizado para dividir
-            #         # a carga com a rede elétrica.
-            #         else:
-            #             excess = generation_energy - (self.storage.max_storage - self.storage.energy) 
-            #             self.storage.energy = self.storage.max_storage
-
-            #             self.power_input += (self.load.demand - (excess / delta_em_horas))
-            #     # caso o sistema de armazenamento esteja 100% carregado
-            #     # toda a energia produzida pela geracao sera utilizada para
-            #     # alimentar as cargas do prosumidor, com possibilidade de 
-            #     # geracao de excedente de energia.
-            #     else:
-            #         self.power_input += self.load.demand - self.generation_power
         else:
             self.power_input = self.load_demand
 
@@ -305,3 +407,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

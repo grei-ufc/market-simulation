@@ -3,13 +3,21 @@ from pade.acl.aid import AID
 from device_agent import DeviceAgent
 from concentrator_agent import ConcentratorAgent
 
+from start_mosaik_sim import load_low_voltage_prosumers
+
 def config_agents():
 
-    agents = list()
+    prosumers_id = load_low_voltage_prosumers('force.json')
 
-    device_agent = DeviceAgent(AID(name='device@localhost:1234'))
-    concentrator_agent = ConcentratorAgent(AID(name='concentrator@localhost:1235'))
-    agents.append(device_agent)
+    agents = list()
+    port = 1234
+    for i in prosumers_id:
+        name = 'device' + str(i[0])
+        device_agent = DeviceAgent(AID(name=name + '@localhost:' + str(port)))
+        port += 1
+        agents.append(device_agent)
+
+    concentrator_agent = ConcentratorAgent(AID(name='concentrator@localhost:' + str(port)))
     agents.append(concentrator_agent)
 
     s = PadeSession()
