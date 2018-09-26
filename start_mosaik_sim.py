@@ -18,36 +18,32 @@ def load_low_voltage_prosumers(file):
 
     data = json.load(open(file, 'r'))
 
-    # define o grau de penetração de DER na rede
-    der_penetration = 0.5
-
-    # definie a quantidade de consumidores que posssuem DER
-    prosumers_number = int(der_penetration * len(data['nodes']))
-
-    # amostra randomicamente os consumidores que possuem DER, deacordo com
-    # a quantidade especificada na variável prosumers_number
-    # TODO:
-    # existe uma pendência neste tópico, pois só pode haver prosumidor na baixa tensão
-    # e caso um dos nós escolhidos seja da média então este nó será excluído e o grau de
-    # de penetração de gd definido não será atendido. 
-    prosumers_with_der =  random.sample(range(len(data['nodes'])), prosumers_number)
-
     prosumers_id = list()
     for i in data['nodes']:
         if i['voltage_level'] == 'low voltage':
-            if i['name'] in prosumers_with_der:
-                prosumers_id.append((i['name'], True))
-            else:
-                prosumers_id.append((i['name'], False))
+            prosumers_id.append(i['name'])
 
     return prosumers_id
 
 
-def create_scenario(world, prosumers_id, device_agent_sim_names):
+def create_scenario(world, config_dict, device_agent_sim_names):
+    
+    # =======================================
+    # inicializa a classe que representa os 
+    # comportamentos da unidade prosumidora 
+    # com seus respectivos dispositivos de 
+    # geração ou de consumo
+    # =======================================
     prosumer_sim = world.start('ProsumerSim',
                                eid_prefix='Prosumer_',
                                start=START,
                                step_size=1 * 60)
+    
+    # =======================================
+    # inicializa as classes que irão representar
+    # cada um dos agentes dispositivos via 
+    # comunicação com a plataforma PADE
+    # =======================================
     device_agent_sim_list = list()
     for i in device_agent_sim_names:
         device_agent_sim = world.start(i,
@@ -63,7 +59,8 @@ def create_scenario(world, prosumers_id, device_agent_sim_names):
     # simulação 
     # =======================================
 
-    prosumers = prosumer_sim.Prosumer.create(len(prosumers_id), prosumers_id=prosumers_id)
+    prosumers = prosumer_sim.Prosumer.create(len(config_dict),
+                                             config_dict=config_dict)
 
     device_agents = [i.DeviceAgent.create(1) for i in device_agent_sim_list]
 
@@ -79,6 +76,15 @@ def create_scenario(world, prosumers_id, device_agent_sim_names):
 
 if __name__ == '__main__':
     
+    # Carrega o dicionário que contem as configurações
+    # de cada um dos prosumidores da rede
+    config_file = json.load(open('config.json'))
+    configs_list = list()
+    config_dict = {str(i): {} for i in config_file['nodes']}
+    for i, j in config_file['devices'].items():
+        for k, w in j['powers'].items():
+            config_dict[k][i] = {'value': w}
+
     prosumers_id = load_low_voltage_prosumers('force.json')
 
     sim_config = dict()
@@ -86,13 +92,13 @@ if __name__ == '__main__':
 
     port = 1234
     device_agent_sim_names = list()
-    for i, j in enumerate(prosumers_id):    
+    for i in prosumers_id:    
         name = 'DeviceAgentSim' + str(i)
         device_agent_sim_names.append(name)
         sim_config[name] = {'connect': 'localhost:' + str(port)}
         port += 1
 
     world = mosaik.World(sim_config)
-    create_scenario(world, prosumers_id, device_agent_sim_names)
+    create_scenario(world, config_dict, device_agent_sim_names)
 
     world.run(until=END)

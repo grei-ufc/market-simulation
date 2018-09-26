@@ -11,8 +11,8 @@ def config_agents():
 
     agents = list()
     port = 1234
-    for i in prosumers_id:
-        name = 'device' + str(i[0])
+    for p_id in prosumers_id:
+        name = 'device' + str(p_id)
         device_agent = DeviceAgent(AID(name=name + '@localhost:' + str(port)))
         port += 1
         agents.append(device_agent)

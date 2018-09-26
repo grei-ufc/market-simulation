@@ -5,7 +5,7 @@ META = {
     'models': {
         'Prosumer': {
             'public': True,
-            'params': ['prosumers_id'],
+            'params': ['config_dict'],
             'attrs': ['datetime', 'storage', 'storage_energy', 'power_input', 'power_forecast'],
         }
     }
@@ -26,7 +26,7 @@ class ProsumerSim(mosaik_api.Simulator):
         self.eid_prefix = eid_prefix
         return self.meta
 
-    def create(self, num, model, prosumers_id):
+    def create(self, num, model, config_dict):
         '''O parametro prosumers_id é uma tupla em que a posição 0 contém
         o nome do nó considerado e a posição 1 contém um valor booleano
         para indicar ou não a presença de DER no consumidor
@@ -34,12 +34,12 @@ class ProsumerSim(mosaik_api.Simulator):
         next_eid = len(self.entities)
         entities = []
 
-        for i, j in zip(range(next_eid, next_eid + num), prosumers_id):
-            eid = '%s%d' % (self.eid_prefix, j[0])
-            self.simulator.add_prosumer(j[1])
+        for i, j in zip(range(next_eid, next_eid + num), config_dict):
+            eid = '{}{}'.format(self.eid_prefix, j)
             self.entities[eid] = i
             entities.append({'eid': eid, 'type': model})
 
+        self.simulator.add_prosumers(config_dict)
         return entities
 
     def step(self, time, inputs):

@@ -9,6 +9,7 @@ consumidora/produtora de energia, tais como:
 
 from random import uniform
 import datetime as dt
+import json
 import enlopy as el
 import numpy as np
 
@@ -46,8 +47,8 @@ class ShiftableLoad(object):
             for datetime in datetimes:
                 sl1.step(datetime)
         '''
-        self.datetime = dt.datetime.strptime(datetime, '%d/%m/%Y - %H:%M:%S')
-        self.start_datetime = dt.datetime.strptime(start_datetime, '%d/%m/%Y - %H:%M:%S')
+        self.datetime = datetime
+        self.start_datetime = start_datetime
         self.demand = demand
         self.time_delta = time_delta
         self.status = self.OFF
@@ -58,10 +59,10 @@ class ShiftableLoad(object):
     def step(self, datetime):
         exec_time = 0.0
         if self.status == self.OFF:
-            if (datetime >= self.start_datetime) and (not self.executed_today):
+            if datetime >= self.start_datetime and not self.executed_today:
                 self.status = self.ON
             else:
-                if (datetime.day == self.start_datetime.day) and (self.executed_today):
+                if datetime.day == self.start_datetime.day and self.executed_today:
                     self.executed_today = False
                     self.time_left_in_sec = self.time_delta.seconds
 
@@ -82,6 +83,7 @@ class ShiftableLoad(object):
         
         if energy != 0.0:
             print('Load Executed: {:.2f} in {}'.format(energy, datetime))
+        
         return round(energy, 2)
 
 
@@ -98,7 +100,7 @@ class UserLoad(object):
         # definição da curva de carga do consumidor
         self.load_curve = el.gen_daily_stoch_el(user_daily_energy)
 
-    def step(self, datetime, commands):
+    def step(self, datetime):
         '''
         '''
         delta_de_tempo = datetime - self.datetime
@@ -203,19 +205,32 @@ class Storage(object):
 
     def __init__(self, datetime, power_kva, max_storage_kwh=10.0):
         self.energy = 0.0
-        self.max_storage = max_storage
+        self.max_storage_kwh = max_storage_kwh
         self.power_kva = power_kva
         self.state = self.LOADING
-        self.datetime = self.datetime
+        self.datetime = datetime
 
-    def step(self, energy):
-        self.energy += round(energy, 3)
-        excess = 0.0
-        if self.energy > self.max_storage:
-            self.energy = self.max_storage
-            excess = self.max_storage - self.energy
-        else:
-            pass
+        self.tx_load = 0.3
+        self.tx_unload = 0.3
+
+    def step(self, datetime):
+        delta_de_tempo = datetime - self.datetime
+        delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
+        self.datetime = datetime
+
+        if self.state == self.LOADING:
+            energy = self.tx_load * delta_em_horas
+            self.energy += round(energy, 3)
+            excess = 0.0
+            if self.energy > self.max_storage_kwh:
+                excess = self.max_storage_kwh - self.energy
+                self.energy = self.max_storage_kwh
+        elif self.state == self.UNLOADING:
+            energy = self.tx_unload * delta_em_horas
+            self.energy -= round(energy, 3)
+            if self.energy < 0.0:
+                excess = - self.energy
+                self.energy = 0.0
         return excess
 
     def __repr__(self):
@@ -229,7 +244,7 @@ class BufferingDevice(object):
         self.power_kva = power_kva
 
     def step(self, datetime):
-        pass
+        return 0.0
 
 
 class Prosumer(object):
@@ -262,8 +277,7 @@ class Prosumer(object):
                 }
             }
         '''
-        self.datetime = self.datetime
-        self.load = Load(self.datetime)
+        self.datetime = datetime
 
         self.stochastic_gen = None
         self.shiftable_load = None
@@ -277,12 +291,13 @@ class Prosumer(object):
                 self.stochastic_gen = PVGeneration(datetime=datetime,
                                                    power_kva=device_values['value'])
             elif device_name == 'shiftable_load':
+                start_datetime = datetime + dt.timedelta(hours=int(uniform(5, 22)))
                 self.shiftable_load = ShiftableLoad(datetime=datetime,
-                                                    start_datetime=datetime,
+                                                    start_datetime=start_datetime,
                                                     demand=device_values['value'],
-                                                    time_delta=0.5)
+                                                    time_delta=dt.timedelta(hours=0.5))
             elif device_name == 'buffering_device':
-                self.shiftable_load = BufferingDevice(datetime=datetime,
+                self.buffering_device = BufferingDevice(datetime=datetime,
                                                       power_kva=device_values['value'])
             elif device_name == 'storage_device':
                 self.storage_device = Storage(datetime=datetime,
@@ -293,13 +308,6 @@ class Prosumer(object):
             elif device_name == 'user_action_device':
                 self.user_action_device = UserLoad(datetime=datetime,
                                                    user_daily_energy=device_values['value'])
-
-        if self.has_der:
-            self.generation = Generation(self.datetime)
-            self.storage = Storage(self.datetime)
-        else:
-            self.generation = None
-            self.storage = None
 
         # mosaik simulation controller params
         self.power_input = 0.0
@@ -314,18 +322,25 @@ class Prosumer(object):
         delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
 
         self.datetime = datetime
+        self.power_input = 0.0
 
-        self.load_demand = self.load.step(datetime)
+        if self.stochastic_gen is not None:
+            self.power_input += self.stochastic_gen.step(datetime)
 
-        self.forecast(datetime)
+        if self.shiftable_load is not None:
+            self.power_input += self.shiftable_load.step(datetime)
 
-        # verifica se o consumidor tem recursos energéticos distribuídos
-        if self.has_der:
-            self.generation_power = self.generation.step(datetime)
-            self.power_input = 0.0
-            self.power_input += self.load.demand - self.generation_power
-        else:
-            self.power_input = self.load_demand
+        if self.buffering_device is not None:
+            self.power_input += self.buffering_device.step(datetime)
+
+        if self.storage_device is not None:
+            self.power_input += self.storage_device.step(datetime)
+
+        if self.freely_control_gem is not None:
+            self.power_input += self.freely_control_gem.step(datetime)
+
+        if self.user_action_device is not None:
+            self.power_input += self.user_action_device.step(datetime)
 
     def forecast(self, datetime):
         self.load.forecast(datetime)
@@ -335,20 +350,6 @@ class Prosumer(object):
         else:
             self.power_forecast = self.load.demand_forecast
 
-    @property
-    def storage_energy(self):
-        if self.has_der:
-            return self.storage.energy
-        else:
-            return 0.0
-
-    @storage_energy.setter
-    def storage_energy(self, value):
-        if self.has_der:
-            self.storage.energy = value
-            self._storage_energy = value
-        else:
-            pass
 
     def __repr__(self):
         return 'Prosumer'
@@ -364,10 +365,11 @@ class Simulator(object):
         self.data = []
         self.start_datetime = dt.datetime.strptime(start_datetime, '%d/%m/%Y - %H:%M:%S')
 
-    def add_prosumer(self, has_der):
-        prosumer = Prosumer(self.start_datetime, has_der)
-        self.prosumers.append(prosumer)
-        self.data.append([])
+    def add_prosumers(self, configs):
+        for config in configs.values():
+            prosumer = Prosumer(self.start_datetime, config)
+            self.prosumers.append(prosumer)
+            self.data.append([])
 
     def step(self, time, storages=None):
         delta = dt.timedelta(0, time)
@@ -379,15 +381,21 @@ class Simulator(object):
 
         for i, prosumer in enumerate(self.prosumers):
             prosumer.step(datetime)
+            
+            # ================================
+            # PRIORIDADE PARA FIX!
+            # ================================
+
             data = {'datetime': datetime.strftime('%D - %T'),
-                    'load_demand': prosumer.load_demand,
-                    'generation_power': prosumer.generation_power,
-                    'storage_energy': prosumer.storage_energy,
-                    'forecast_demand': prosumer.power_forecast}
+                    'load_demand': 0.0,
+                    'generation_power': 0.0,
+                    'storage_energy': 0.0,
+                    'forecast_demand': 0.0}
             self.data[i].append(data)
 
 
 def main():
+
     start = '14/03/2018 - 00:00:00'
     sim = Simulator(start_datetime=start)
     for i in range(5):
