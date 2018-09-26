@@ -71,7 +71,7 @@ def create_scenario(world, config_dict, device_agent_sim_names):
 
     for prosumer, device_agent in zip(prosumers, device_agents):
         # world.connect(customer, market, 'order', async_requests=True)
-        world.connect(prosumer, device_agent[0], 'power_forecast', async_requests=True)
+        world.connect(prosumer, device_agent[0], 'demand', async_requests=True)
 
 
 if __name__ == '__main__':

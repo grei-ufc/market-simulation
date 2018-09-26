@@ -18,8 +18,8 @@ MOSAIK_MODELS = {
     'models': {
         'DeviceAgent': {
             'public': True,
-            'params': ['prosumers_id'],
-            'attrs': ['power_forecast'],
+            'params': [],
+            'attrs': ['datetime', 'demand'],
         },
     },
 }

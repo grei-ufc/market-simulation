@@ -6,7 +6,7 @@ META = {
         'Prosumer': {
             'public': True,
             'params': ['config_dict'],
-            'attrs': ['datetime', 'storage', 'storage_energy', 'power_input', 'power_forecast'],
+            'attrs': ['datetime', 'demand'],
         }
     }
 }
@@ -43,13 +43,12 @@ class ProsumerSim(mosaik_api.Simulator):
         return entities
 
     def step(self, time, inputs):
-        storages = {}
-        for eid, attrs in inputs.items():
-            for attr, values in attrs.items():
-                model_idx = self.entities[eid]
-                storage = [i for i in values.values()][0]  # analisar esse ponto
-                storages[model_idx] = storage
-        self.simulator.step(time, storages)
+        # for eid, attrs in inputs.items():
+        #     for attr, values in attrs.items():
+        #         model_idx = self.entities[eid]
+        #         storage = [i for i in values.values()][0]  # analisar esse ponto
+        #         storages[model_idx] = storage
+        self.simulator.step(time)
         return time + self.step_size
 
     def get_data(self, outputs):
@@ -59,7 +58,7 @@ class ProsumerSim(mosaik_api.Simulator):
             data[eid] = {}
             for attr in attrs:
                 if attr not in self.meta['models']['Prosumer']['attrs']:
-                    raise ValueError('Unknown output attribute: %s' % attr)
+                    raise ValueError('Unknown output attribute: {}'.format(attr))
                 data[eid][attr] = getattr(self.simulator.prosumers[model_idx], attr)
         return data
 

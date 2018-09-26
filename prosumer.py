@@ -57,7 +57,9 @@ class ShiftableLoad(object):
 
 
     def step(self, datetime):
-        exec_time = 0.0
+        demand = 0.0
+        delta_in_hours = 0.0
+
         if self.status == self.OFF:
             if datetime >= self.start_datetime and not self.executed_today:
                 self.status = self.ON
@@ -67,24 +69,27 @@ class ShiftableLoad(object):
                     self.time_left_in_sec = self.time_delta.seconds
 
         if self.status == self.ON:
+            demand = self.demand
+
             self.delta = datetime - self.datetime
             if self.delta.seconds <= self.time_left_in_sec:
                 self.time_left_in_sec -= self.delta.seconds
-                exec_time = self.delta.seconds
+                delta_in_hours = self.delta.seconds / (60.0 * 60.0)
             else:
-                exec_time = self.time_left_in_sec
+                delta_in_hours = self.time_left_in_sec / (60.0 * 60.0)
                 self.time_left_in_sec = 0
                 self.executed_today = True
                 self.start_datetime += dt.timedelta(hours=24)
                 self.status = self.OFF
             
-        self.datetime = datetime
-        energy = self.demand * (exec_time / (60.0 * 60.0))
+        self.datetime = round(demand, 2)
+        self.energy = round(self.demand * delta_in_hours, 2)
+        # energy = self.demand * (exec_time / (60.0 * 60.0))
         
-        if energy != 0.0:
+        if demand != 0.0:
             print('Load Executed: {:.2f} in {}'.format(energy, datetime))
         
-        return round(energy, 2)
+        return self.demand
 
 
 class UserLoad(object):
@@ -103,21 +108,21 @@ class UserLoad(object):
     def step(self, datetime):
         '''
         '''
-        delta_de_tempo = datetime - self.datetime
-        delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
+        time_delta = datetime - self.datetime
+        delta_in_hours = time_delta.seconds / (60.0 * 60.0)
 
         self.datetime = datetime
         self.demand = np.interp(datetime.hour + datetime.minute / 60.0,
                                 np.arange(24),
                                 self.load_curve)
-        self.energy = round(self.demand * delta_em_horas, 3)
+        self.energy = round(self.demand * delta_in_hours, 2)
         return self.demand
 
     def forecast(self, datetime):
-        datetime_list = [datetime + dt.timedelta(0, 15.0 * 60.0 + i * 60) for i in range(1, 16)]
+        datetime_list = [datetime + dt.timedelta(0, 15.0 * 60.0 + i * 60.0) for i in range(1, 16)]
         hours = [round(i.hour + i.minute / 60.0, 2) for i in datetime_list]
         self.demand_forecast = np.mean(np.interp(hours, np.arange(24), self.load_curve))
-        self.energy_forecast = round(self.demand_forecast * 15.0 / 60.0, 3)
+        self.energy_forecast = round(self.demand_forecast * 15.0 / 60.0, 2)
         return self.demand_forecast
 
     def __repr__(self):
@@ -129,32 +134,34 @@ class DieselGeneration(object):
     OFF = 0
     ON = 1
 
-    def __init__(self, datetime, power_kva):
+    def __init__(self, datetime, demand):
         self.datetime = datetime
-        self.power_kva = power_kva
+        self.demand = demand
         self.status = self.OFF
 
 
     def step(self, datetime):
-        exec_time = 0.0
+        demand = 0.0
+        delta_in_hours = 0.0
 
         if self.status == self.ON:
+            demand = self.demand
             self.delta = datetime - self.datetime
             if self.delta.seconds <= self.time_left_in_sec:
                 self.time_left_in_sec -= self.delta.seconds
-                exec_time = self.delta.seconds
+                delta_in_hours = self.delta.seconds
             else:
-                exec_time = self.time_left_in_sec
+                delta_in_hours = self.time_left_in_sec
                 self.time_left_in_sec = 0
                 self.start_datetime += dt.timedelta(hours=24)
                 self.status = self.OFF
             
         self.datetime = datetime
-        energy = self.power_kva * (exec_time / (60.0 * 60.0))
+        self.energy = demand * (delta_in_hours / (60.0 * 60.0))
         
-        if energy != 0.0:
-            print('Generation Executed: {:.2f} kVA in {}'.format(energy, datetime))
-        return round(energy, 2)
+        if demand != 0.0:
+            print('Generation Executed: {:.2f} kVA in {}'.format(demand, datetime))
+        return - demand
 
 
 class PVGeneration(object):
@@ -162,8 +169,8 @@ class PVGeneration(object):
     de tempo retorna a produção média de energia 
     para um determinado período de tempo.
     """
-    def __init__(self, datetime, power_kva):
-        self.power_kva = power_kva
+    def __init__(self, datetime, demand):
+        self.demand = demand
         self.datetime = datetime
 
     def step(self, datetime):
@@ -172,13 +179,13 @@ class PVGeneration(object):
         self.datetime = datetime
 
         if datetime.hour >= 18 or datetime.hour < 6:
-            self.power_kva = 0.0
+            self.demand = 0.0
         else:
-            self.power_kva = round(uniform(0.2, 1.2), 3)
+            self.demand = round(uniform(0.2, 1.2), 3)
         
-        self.energy = round(self.power_kva * delta_em_horas, 3)
+        self.energy = round(self.demand * delta_em_horas, 3)
         
-        return self.power_kva
+        return - self.demand
 
     def forecast(self, datetime):
         if datetime.hour >= 18 or datetime.hour < 7:
@@ -200,38 +207,46 @@ class Storage(object):
     consumida/armazenada no sistema de armazenamento
     dependendo do modo de operação loading/unloading.
     """
-    LOADING = 1
-    UNLOADING = 0
+    OFF = 0
+    ON_LOADING = 1
+    ON_UNLOADING = 2
 
-    def __init__(self, datetime, power_kva, max_storage_kwh=10.0):
+    def __init__(self, datetime, demand, max_storage_kwh=10.0):
         self.energy = 0.0
         self.max_storage_kwh = max_storage_kwh
-        self.power_kva = power_kva
-        self.state = self.LOADING
+        self.demand = demand
+        self.state = self.ON_LOADING
         self.datetime = datetime
 
         self.tx_load = 0.3
         self.tx_unload = 0.3
 
     def step(self, datetime):
+        demand = 0.0
+
         delta_de_tempo = datetime - self.datetime
         delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
         self.datetime = datetime
 
-        if self.state == self.LOADING:
+        if self.state == self.ON_LOADING:
+            demand = self.demand
             energy = self.tx_load * delta_em_horas
             self.energy += round(energy, 3)
             excess = 0.0
             if self.energy > self.max_storage_kwh:
                 excess = self.max_storage_kwh - self.energy
                 self.energy = self.max_storage_kwh
-        elif self.state == self.UNLOADING:
+        elif self.state == self.ON_UNLOADING:
+            demand = - self.demand
             energy = self.tx_unload * delta_em_horas
             self.energy -= round(energy, 3)
             if self.energy < 0.0:
                 excess = - self.energy
                 self.energy = 0.0
-        return excess
+        elif self.state == self.OFF:
+            energy = 0.0
+
+        return demand
 
     def __repr__(self):
         return 'Storage'
@@ -239,9 +254,9 @@ class Storage(object):
 
 class BufferingDevice(object):
 
-    def __init__(self, datetime, power_kva):
+    def __init__(self, datetime, demand):
         self.datetime = datetime
-        self.power_kva = power_kva
+        self.demand = demand
 
     def step(self, datetime):
         return 0.0
@@ -289,7 +304,7 @@ class Prosumer(object):
         for device_name, device_values in config.items():
             if device_name == 'stochastic_gen':
                 self.stochastic_gen = PVGeneration(datetime=datetime,
-                                                   power_kva=device_values['value'])
+                                                   demand=device_values['value'])
             elif device_name == 'shiftable_load':
                 start_datetime = datetime + dt.timedelta(hours=int(uniform(5, 22)))
                 self.shiftable_load = ShiftableLoad(datetime=datetime,
@@ -298,19 +313,19 @@ class Prosumer(object):
                                                     time_delta=dt.timedelta(hours=0.5))
             elif device_name == 'buffering_device':
                 self.buffering_device = BufferingDevice(datetime=datetime,
-                                                      power_kva=device_values['value'])
+                                                        demand=device_values['value'])
             elif device_name == 'storage_device':
                 self.storage_device = Storage(datetime=datetime,
-                                              power_kva=device_values['value'])
+                                              demand=device_values['value'])
             elif device_name == 'freely_control_gem':
                 self.freely_control_gem = DieselGeneration(datetime=datetime,
-                                                           power_kva=device_values['value'])
+                                                           demand=device_values['value'])
             elif device_name == 'user_action_device':
                 self.user_action_device = UserLoad(datetime=datetime,
                                                    user_daily_energy=device_values['value'])
 
         # mosaik simulation controller params
-        self.power_input = 0.0
+        self.demand = 0.0
         self.power_forecast = 0.0
         self.load_demand = 0.0
         self.generation_power = 0.0
@@ -322,25 +337,25 @@ class Prosumer(object):
         delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
 
         self.datetime = datetime
-        self.power_input = 0.0
+        self.demand = 0.0
 
         if self.stochastic_gen is not None:
-            self.power_input += self.stochastic_gen.step(datetime)
+            self.demand += self.stochastic_gen.step(datetime)
 
         if self.shiftable_load is not None:
-            self.power_input += self.shiftable_load.step(datetime)
+            self.demand += self.shiftable_load.step(datetime)
 
         if self.buffering_device is not None:
-            self.power_input += self.buffering_device.step(datetime)
+            self.demand += self.buffering_device.step(datetime)
 
         if self.storage_device is not None:
-            self.power_input += self.storage_device.step(datetime)
+            self.demand += self.storage_device.step(datetime)
 
         if self.freely_control_gem is not None:
-            self.power_input += self.freely_control_gem.step(datetime)
+            self.demand += self.freely_control_gem.step(datetime)
 
         if self.user_action_device is not None:
-            self.power_input += self.user_action_device.step(datetime)
+            self.demand += self.user_action_device.step(datetime)
 
     def forecast(self, datetime):
         self.load.forecast(datetime)
@@ -371,13 +386,9 @@ class Simulator(object):
             self.prosumers.append(prosumer)
             self.data.append([])
 
-    def step(self, time, storages=None):
+    def step(self, time):
         delta = dt.timedelta(0, time)
         datetime = self.start_datetime + delta
-
-        if storages:
-            for idx, storage in storages.items():
-                self.prosumers[idx].storage = storage
 
         for i, prosumer in enumerate(self.prosumers):
             prosumer.step(datetime)
@@ -387,10 +398,7 @@ class Simulator(object):
             # ================================
 
             data = {'datetime': datetime.strftime('%D - %T'),
-                    'load_demand': 0.0,
-                    'generation_power': 0.0,
-                    'storage_energy': 0.0,
-                    'forecast_demand': 0.0}
+                    'demand': 0.0}
             self.data[i].append(data)
 
 
