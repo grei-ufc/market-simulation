@@ -9,7 +9,7 @@ import random
 
 QTD_HOURS = 1
 
-START = '12/03/2018 - 00:00:00'
+START = '12/03/2018 - 10:00:00'
 END = int(QTD_HOURS * 60 * 60)
 
 
@@ -71,7 +71,7 @@ def create_scenario(world, config_dict, device_agent_sim_names):
 
     for prosumer, device_agent in zip(prosumers, device_agents):
         # world.connect(customer, market, 'order', async_requests=True)
-        world.connect(prosumer, device_agent[0], 'demand', async_requests=True)
+        world.connect(prosumer, device_agent[0], 'device_status', async_requests=True)
 
 
 if __name__ == '__main__':

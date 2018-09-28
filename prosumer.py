@@ -327,9 +327,12 @@ class Prosumer(object):
         # mosaik simulation controller params
         self.demand = 0.0
         self.power_forecast = 0.0
-        self.load_demand = 0.0
-        self.generation_power = 0.0
-        self._storage_energy = 0.0
+        self.device_status = {'stochastic_gen': {'demand': 0.0},
+                              'shiftable_load': {'demand': 0.0},
+                              'buffering_device': {'demand': 0.0},
+                              'storage_device': {'demand': 0.0},
+                              'freely_control_gem': {'demand': 0.0},
+                              'user_action_device': {'demand': 0.0}}
 
     def step(self, datetime):
 
@@ -340,22 +343,34 @@ class Prosumer(object):
         self.demand = 0.0
 
         if self.stochastic_gen is not None:
-            self.demand += self.stochastic_gen.step(datetime)
+            d = self.stochastic_gen.step(datetime)
+            self.device_status['stochastic_gen']['demand'] = d
+            self.demand += d
 
         if self.shiftable_load is not None:
-            self.demand += self.shiftable_load.step(datetime)
+            d = self.shiftable_load.step(datetime)
+            self.device_status['shiftable_load']['demand'] = d
+            self.demand += d
 
         if self.buffering_device is not None:
-            self.demand += self.buffering_device.step(datetime)
+            d = self.buffering_device.step(datetime)
+            self.device_status['buffering_device']['demand'] = d
+            self.demand += d
 
         if self.storage_device is not None:
-            self.demand += self.storage_device.step(datetime)
+            d = self.storage_device.step(datetime)
+            self.device_status['buffering_device']['demand'] = d
+            self.demand += d
 
         if self.freely_control_gem is not None:
-            self.demand += self.freely_control_gem.step(datetime)
+            d = self.freely_control_gem.step(datetime)
+            self.device_status['freely_control_gem']['demand'] = d
+            self.demand += d
 
         if self.user_action_device is not None:
-            self.demand += self.user_action_device.step(datetime)
+            d = self.user_action_device.step(datetime)
+            self.device_status['user_action_device']['demand'] = d
+            self.demand += d
 
     def forecast(self, datetime):
         self.load.forecast(datetime)

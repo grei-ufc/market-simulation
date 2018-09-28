@@ -6,7 +6,7 @@ META = {
         'Prosumer': {
             'public': True,
             'params': ['config_dict'],
-            'attrs': ['datetime', 'demand'],
+            'attrs': ['device_status'],
         }
     }
 }

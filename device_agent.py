@@ -19,7 +19,7 @@ MOSAIK_MODELS = {
         'DeviceAgent': {
             'public': True,
             'params': [],
-            'attrs': ['datetime', 'demand'],
+            'attrs': ['device_status'],
         },
     },
 }
