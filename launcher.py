@@ -2,24 +2,17 @@ import subprocess
 import shlex
 from time import sleep
 
-commands = 'python start_pade_agents.py'
+commands = 'pade start_runtime --config_file pade_config.json'
 commands = shlex.split(commands)
 p1 = subprocess.Popen(commands, stdin=subprocess.PIPE)
 
-sleep(10.0)
+sleep(15.0)
 
 commands = 'python start_mosaik_sim.py'
 commands = shlex.split(commands)
 p2 = subprocess.Popen(commands, stdin=subprocess.PIPE)
 
-sleep(10.0)
+sleep(60.0)
 
-p1.kill()
-p2.kill()
-
-commands = 'fuser -k 5000/tcp'
-commands = shlex.split(commands)
-p3 = subprocess.Popen(commands, stdin=subprocess.PIPE,)
-sleep(1.0)
-p3.kill()
-
+p1.terminate()
+p2.terminate()

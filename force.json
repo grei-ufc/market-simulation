@@ -1,1 +1,417 @@
-{"directed": false, "multigraph": false, "graph": {}, "nodes": [{"name": 0, "voltage_level": "medium voltage", "color": "rgb(31, 119, 180)", "active_power": 0.0, "reactive_power": 0.0, "id": 0}, {"name": 1, "voltage_level": "medium voltage", "color": "rgb(31, 119, 180)", "active_power": 0.0, "reactive_power": 0.0, "id": 1}, {"name": 2, "voltage_level": "medium voltage", "color": "rgb(31, 119, 180)", "active_power": 0.0, "reactive_power": 0.0, "id": 2}, {"name": 3, "voltage_level": "medium voltage", "color": "rgb(31, 119, 180)", "active_power": 0.0, "reactive_power": 0.0, "id": 3}, {"name": 4, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.329, "reactive_power": 1.329, "phase": "c", "id": 4}, {"name": 5, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.964, "reactive_power": 0.964, "phase": "b", "id": 5}, {"name": 6, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.177, "reactive_power": 1.177, "phase": "b", "id": 6}, {"name": 7, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.145, "reactive_power": 1.145, "phase": "c", "id": 7}, {"name": 8, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.746, "reactive_power": 0.746, "phase": "c", "id": 8}, {"name": 9, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.765, "reactive_power": 0.765, "phase": "c", "id": 9}, {"name": 10, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.125, "reactive_power": 1.125, "phase": "b", "id": 10}, {"name": 11, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.196, "reactive_power": 1.196, "phase": "a", "id": 11}, {"name": 12, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.785, "reactive_power": 0.785, "phase": "c", "id": 12}, {"name": 13, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.731, "reactive_power": 0.731, "phase": "a", "id": 13}, {"name": 14, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.223, "reactive_power": 1.223, "phase": "a", "id": 14}, {"name": 15, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.928, "reactive_power": 0.928, "phase": "b", "id": 15}, {"name": 16, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.003, "reactive_power": 1.003, "phase": "a", "id": 16}, {"name": 17, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.04, "reactive_power": 1.04, "phase": "a", "id": 17}, {"name": 18, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.286, "reactive_power": 1.286, "phase": "b", "id": 18}, {"name": 19, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.315, "reactive_power": 1.315, "phase": "a", "id": 19}, {"name": 20, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.827, "reactive_power": 0.827, "phase": "c", "id": 20}, {"name": 21, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.84, "reactive_power": 0.84, "phase": "c", "id": 21}, {"name": 22, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 1.021, "reactive_power": 1.021, "phase": "b", "id": 22}, {"name": 23, "color": "rgb(255, 127, 14)", "voltage_level": "low voltage", "active_power": 0.79, "reactive_power": 0.79, "phase": "a", "id": 23}], "links": [{"name": "Section_0_1", "type": "line", "length": 0.096, "switch": "sw_1", "source": 0, "target": 1}, {"name": "Section_1_2", "type": "line", "length": 0.093, "switch": null, "source": 1, "target": 2}, {"name": "Section_2_3", "type": "line", "length": 0.062, "switch": null, "source": 2, "target": 3}, {"name": "Section_2_4", "type": "transformer", "switch": null, "source": 2, "target": 4}, {"name": "Section_3_16", "type": "transformer", "switch": null, "source": 3, "target": 16}, {"name": "Section_4_5", "type": "line", "length": 0.008, "switch": null, "source": 4, "target": 5}, {"name": "Section_5_6", "type": "line", "length": 0.01, "switch": null, "source": 5, "target": 6}, {"name": "Section_6_7", "type": "line", "length": 0.008, "switch": null, "source": 6, "target": 7}, {"name": "Section_7_8", "type": "line", "length": 0.007, "switch": null, "source": 7, "target": 8}, {"name": "Section_7_10", "type": "line", "length": 0.009, "switch": null, "source": 7, "target": 10}, {"name": "Section_8_9", "type": "line", "length": 0.007, "switch": null, "source": 8, "target": 9}, {"name": "Section_10_11", "type": "line", "length": 0.007, "switch": null, "source": 10, "target": 11}, {"name": "Section_11_12", "type": "line", "length": 0.006, "switch": null, "source": 11, "target": 12}, {"name": "Section_12_13", "type": "line", "length": 0.007, "switch": null, "source": 12, "target": 13}, {"name": "Section_13_14", "type": "line", "length": 0.006, "switch": null, "source": 13, "target": 14}, {"name": "Section_14_15", "type": "line", "length": 0.01, "switch": null, "source": 14, "target": 15}, {"name": "Section_16_17", "type": "line", "length": 0.009, "switch": null, "source": 16, "target": 17}, {"name": "Section_16_21", "type": "line", "length": 0.008, "switch": null, "source": 16, "target": 21}, {"name": "Section_16_22", "type": "line", "length": 0.009, "switch": null, "source": 16, "target": 22}, {"name": "Section_16_23", "type": "line", "length": 0.009, "switch": null, "source": 16, "target": 23}, {"name": "Section_17_18", "type": "line", "length": 0.009, "switch": null, "source": 17, "target": 18}, {"name": "Section_17_19", "type": "line", "length": 0.006, "switch": null, "source": 17, "target": 19}, {"name": "Section_19_20", "type": "line", "length": 0.006, "switch": null, "source": 19, "target": 20}], "transformes": [{"name": "trafo_2_4", "source": 2, "target": 4, "power": 45.0}, {"name": "trafo_3_16", "source": 3, "target": 16, "power": 112.5}]}
+{
+    "directed": false,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "name": 0,
+            "voltage_level": "medium voltage",
+            "color": "rgb(31, 119, 180)",
+            "active_power": 0.0,
+            "reactive_power": 0.0,
+            "id": 0
+        },
+        {
+            "name": 1,
+            "voltage_level": "medium voltage",
+            "color": "rgb(31, 119, 180)",
+            "active_power": 0.0,
+            "reactive_power": 0.0,
+            "id": 1
+        },
+        {
+            "name": 2,
+            "voltage_level": "medium voltage",
+            "color": "rgb(31, 119, 180)",
+            "active_power": 0.0,
+            "reactive_power": 0.0,
+            "id": 2
+        },
+        {
+            "name": 3,
+            "voltage_level": "medium voltage",
+            "color": "rgb(31, 119, 180)",
+            "active_power": 0.0,
+            "reactive_power": 0.0,
+            "id": 3
+        },
+        {
+            "name": 4,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.329,
+            "reactive_power": 1.329,
+            "phase": "c",
+            "id": 4
+        },
+        {
+            "name": 5,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.964,
+            "reactive_power": 0.964,
+            "phase": "b",
+            "id": 5
+        },
+        {
+            "name": 6,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.177,
+            "reactive_power": 1.177,
+            "phase": "b",
+            "id": 6
+        },
+        {
+            "name": 7,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.145,
+            "reactive_power": 1.145,
+            "phase": "c",
+            "id": 7
+        },
+        {
+            "name": 8,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.746,
+            "reactive_power": 0.746,
+            "phase": "c",
+            "id": 8
+        },
+        {
+            "name": 9,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.765,
+            "reactive_power": 0.765,
+            "phase": "c",
+            "id": 9
+        },
+        {
+            "name": 10,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.125,
+            "reactive_power": 1.125,
+            "phase": "b",
+            "id": 10
+        },
+        {
+            "name": 11,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.196,
+            "reactive_power": 1.196,
+            "phase": "a",
+            "id": 11
+        },
+        {
+            "name": 12,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.785,
+            "reactive_power": 0.785,
+            "phase": "c",
+            "id": 12
+        },
+        {
+            "name": 13,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.731,
+            "reactive_power": 0.731,
+            "phase": "a",
+            "id": 13
+        },
+        {
+            "name": 14,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.223,
+            "reactive_power": 1.223,
+            "phase": "a",
+            "id": 14
+        },
+        {
+            "name": 15,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.928,
+            "reactive_power": 0.928,
+            "phase": "b",
+            "id": 15
+        },
+        {
+            "name": 16,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.003,
+            "reactive_power": 1.003,
+            "phase": "a",
+            "id": 16
+        },
+        {
+            "name": 17,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.04,
+            "reactive_power": 1.04,
+            "phase": "a",
+            "id": 17
+        },
+        {
+            "name": 18,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.286,
+            "reactive_power": 1.286,
+            "phase": "b",
+            "id": 18
+        },
+        {
+            "name": 19,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.315,
+            "reactive_power": 1.315,
+            "phase": "a",
+            "id": 19
+        },
+        {
+            "name": 20,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.827,
+            "reactive_power": 0.827,
+            "phase": "c",
+            "id": 20
+        },
+        {
+            "name": 21,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.84,
+            "reactive_power": 0.84,
+            "phase": "c",
+            "id": 21
+        },
+        {
+            "name": 22,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 1.021,
+            "reactive_power": 1.021,
+            "phase": "b",
+            "id": 22
+        },
+        {
+            "name": 23,
+            "color": "rgb(255, 127, 14)",
+            "voltage_level": "low voltage",
+            "active_power": 0.79,
+            "reactive_power": 0.79,
+            "phase": "a",
+            "id": 23
+        }
+    ],
+    "links": [
+        {
+            "name": "Section_0_1",
+            "type": "line",
+            "length": 0.096,
+            "switch": "sw_1",
+            "source": 0,
+            "target": 1
+        },
+        {
+            "name": "Section_1_2",
+            "type": "line",
+            "length": 0.093,
+            "switch": null,
+            "source": 1,
+            "target": 2
+        },
+        {
+            "name": "Section_2_3",
+            "type": "line",
+            "length": 0.062,
+            "switch": null,
+            "source": 2,
+            "target": 3
+        },
+        {
+            "name": "Section_2_4",
+            "type": "transformer",
+            "switch": null,
+            "source": 2,
+            "target": 4
+        },
+        {
+            "name": "Section_3_16",
+            "type": "transformer",
+            "switch": null,
+            "source": 3,
+            "target": 16
+        },
+        {
+            "name": "Section_4_5",
+            "type": "line",
+            "length": 0.008,
+            "switch": null,
+            "source": 4,
+            "target": 5
+        },
+        {
+            "name": "Section_5_6",
+            "type": "line",
+            "length": 0.01,
+            "switch": null,
+            "source": 5,
+            "target": 6
+        },
+        {
+            "name": "Section_6_7",
+            "type": "line",
+            "length": 0.008,
+            "switch": null,
+            "source": 6,
+            "target": 7
+        },
+        {
+            "name": "Section_7_8",
+            "type": "line",
+            "length": 0.007,
+            "switch": null,
+            "source": 7,
+            "target": 8
+        },
+        {
+            "name": "Section_7_10",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 7,
+            "target": 10
+        },
+        {
+            "name": "Section_8_9",
+            "type": "line",
+            "length": 0.007,
+            "switch": null,
+            "source": 8,
+            "target": 9
+        },
+        {
+            "name": "Section_10_11",
+            "type": "line",
+            "length": 0.007,
+            "switch": null,
+            "source": 10,
+            "target": 11
+        },
+        {
+            "name": "Section_11_12",
+            "type": "line",
+            "length": 0.006,
+            "switch": null,
+            "source": 11,
+            "target": 12
+        },
+        {
+            "name": "Section_12_13",
+            "type": "line",
+            "length": 0.007,
+            "switch": null,
+            "source": 12,
+            "target": 13
+        },
+        {
+            "name": "Section_13_14",
+            "type": "line",
+            "length": 0.006,
+            "switch": null,
+            "source": 13,
+            "target": 14
+        },
+        {
+            "name": "Section_14_15",
+            "type": "line",
+            "length": 0.01,
+            "switch": null,
+            "source": 14,
+            "target": 15
+        },
+        {
+            "name": "Section_16_17",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 16,
+            "target": 17
+        },
+        {
+            "name": "Section_16_21",
+            "type": "line",
+            "length": 0.008,
+            "switch": null,
+            "source": 16,
+            "target": 21
+        },
+        {
+            "name": "Section_16_22",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 16,
+            "target": 22
+        },
+        {
+            "name": "Section_16_23",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 16,
+            "target": 23
+        },
+        {
+            "name": "Section_17_18",
+            "type": "line",
+            "length": 0.009,
+            "switch": null,
+            "source": 17,
+            "target": 18
+        },
+        {
+            "name": "Section_17_19",
+            "type": "line",
+            "length": 0.006,
+            "switch": null,
+            "source": 17,
+            "target": 19
+        },
+        {
+            "name": "Section_19_20",
+            "type": "line",
+            "length": 0.006,
+            "switch": null,
+            "source": 19,
+            "target": 20
+        }
+    ],
+    "transformes": [
+        {
+            "name": "trafo_2_4",
+            "source": 2,
+            "target": 4,
+            "power": 45.0
+        },
+        {
+            "name": "trafo_3_16",
+            "source": 3,
+            "target": 16,
+            "power": 112.5
+        }
+    ]
+}

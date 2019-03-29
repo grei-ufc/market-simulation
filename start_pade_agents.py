@@ -1,32 +1,33 @@
-from pade.misc.common import PadeSession
 from pade.acl.aid import AID
-from device_agent import DeviceAgent
+from prosumer_agent import ProsumerAgent
 from concentrator_agent import ConcentratorAgent
+from utility_agent import UtilityAgent
+from pade.misc.utility import start_loop
 
 from start_mosaik_sim import load_low_voltage_prosumers
 
-def config_agents():
+import sys
+    
+
+if __name__ == '__main__':
 
     prosumers_id = load_low_voltage_prosumers('force.json')
 
     agents = list()
-    port = 1234
+    port = int(sys.argv[1]) 
     for p_id in prosumers_id:
-        name = 'device' + str(p_id)
-        device_agent = DeviceAgent(AID(name=name + '@localhost:' + str(port)))
+        name = 'prosumer' + str(p_id)
+        device_agent = ProsumerAgent(aid = AID(name=name + '@localhost:' + str(port)),
+                                   node_id = p_id)
         port += 1
         agents.append(device_agent)
 
     concentrator_agent = ConcentratorAgent(AID(name='concentrator@localhost:' + str(port)))
     agents.append(concentrator_agent)
 
-    s = PadeSession()
-    s.add_all_agents(agents)
-    s.register_user(username='market_user', email='market@pade.com', password='12345')
+    port += 1
 
-    return s
+    utility_agent = UtilityAgent(AID(name='utility@localhost:' + str(port)))
+    agents.append(utility_agent)
 
-if __name__ == '__main__':
-
-    s = config_agents()
-    s.start_loop()
+    start_loop(agents)
