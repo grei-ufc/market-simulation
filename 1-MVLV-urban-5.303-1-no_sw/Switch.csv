@@ -1,0 +1,12 @@
+id;nodeA;nodeB;type;cond;substation;subnet;voltLvl
+MV3.101 loop_line_switch 1.2;MV3.101 Bus 18;MV3.101 Bus 18_1;LBS;0;NULL;MV3.101_Feeder1;5
+MV3.101 loop_line_switch 2.2;MV3.101 Bus 50;MV3.101 Bus 50_1;LBS;0;NULL;MV3.101_Feeder5;5
+MV3.101 loop_line_switch 3.2;MV3.101 Bus 104;MV3.101 Bus 104_1;LBS;0;NULL;MV3.101_Feeder9;5
+MV3.101 loop_line_switch 4.2;MV3.101 Bus 118;MV3.101 Bus 118_1;LBS;0;NULL;MV3.101_Feeder10;5
+MV3.101 loop_line_switch 5.2;MV3.101 Bus 143;MV3.101 Bus 143_1;LBS;0;NULL;MV3.101_Feeder14;5
+MV3.101 loop_line_switch 6.2;MV3.101 Bus 135;MV3.101 Bus 135_1;LBS;0;NULL;MV3.101_Feeder13;5
+MV3.101 loop_line_switch 7.2;MV3.101 Bus 114;MV3.101 Bus 114_1;LBS;0;NULL;MV3.101_Feeder10;5
+MV3.101 loop_line_switch 8.2;MV3.101 Bus 40;MV3.101 Bus 40_1;LBS;0;NULL;MV3.101_Feeder4;5
+MV3.101 loop_line_switch 9.2;MV3.101 Bus 68;MV3.101 Bus 68_1;LBS;0;NULL;MV3.101_Feeder7;5
+MV3.101 loop_line_switch 10.2;MV3.101 Bus 110;MV3.101 Bus 110_1;LBS;0;NULL;MV3.101_Feeder10;5
+MV3.101 loop_line_switch 11.2;MV3.101 Bus 75;MV3.101 Bus 75_1;LBS;0;NULL;MV3.101_Feeder7;5

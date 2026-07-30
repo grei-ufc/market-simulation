@@ -1,0 +1,79 @@
+set Stages := FirstStage SecondStage ;
+
+set Nodes := RootNode
+Scenario-demand0_spot1-Node
+Scenario-demand0_spot7-Node
+Scenario-demand0_spot6-Node
+Scenario-demand1_spot1-Node
+Scenario-demand1_spot7-Node
+Scenario-demand1_spot6-Node
+Scenario-demand2_spot1-Node
+Scenario-demand2_spot7-Node
+Scenario-demand2_spot6-Node
+ ;
+
+param NodeStage := RootNode FirstStage
+Scenario-demand0_spot1-Node SecondStage
+Scenario-demand0_spot7-Node SecondStage
+Scenario-demand0_spot6-Node SecondStage
+Scenario-demand1_spot1-Node SecondStage
+Scenario-demand1_spot7-Node SecondStage
+Scenario-demand1_spot6-Node SecondStage
+Scenario-demand2_spot1-Node SecondStage
+Scenario-demand2_spot7-Node SecondStage
+Scenario-demand2_spot6-Node SecondStage
+ ;
+
+set Children[RootNode] := Scenario-demand0_spot1-Node
+Scenario-demand0_spot7-Node
+Scenario-demand0_spot6-Node
+Scenario-demand1_spot1-Node
+Scenario-demand1_spot7-Node
+Scenario-demand1_spot6-Node
+Scenario-demand2_spot1-Node
+Scenario-demand2_spot7-Node
+Scenario-demand2_spot6-Node
+ ;
+
+param ConditionalProbability := RootNode 1.0
+Scenario-demand0_spot1-Node 0.08504801
+Scenario-demand0_spot7-Node 0.17009602
+Scenario-demand0_spot6-Node 0.12757202
+Scenario-demand1_spot1-Node 0.12620027
+Scenario-demand1_spot7-Node 0.25240055
+Scenario-demand1_spot6-Node 0.18930041
+Scenario-demand2_spot1-Node 0.01097394
+Scenario-demand2_spot7-Node 0.02194787
+Scenario-demand2_spot6-Node 0.01646091
+ ;
+
+set Scenarios :=
+Scenario-demand0_spot1
+Scenario-demand0_spot7
+Scenario-demand0_spot6
+Scenario-demand1_spot1
+Scenario-demand1_spot7
+Scenario-demand1_spot6
+Scenario-demand2_spot1
+Scenario-demand2_spot7
+Scenario-demand2_spot6
+ ;
+
+param ScenarioLeafNode :=
+Scenario-demand0_spot1 Scenario-demand0_spot1-Node
+Scenario-demand0_spot7 Scenario-demand0_spot7-Node
+Scenario-demand0_spot6 Scenario-demand0_spot6-Node
+Scenario-demand1_spot1 Scenario-demand1_spot1-Node
+Scenario-demand1_spot7 Scenario-demand1_spot7-Node
+Scenario-demand1_spot6 Scenario-demand1_spot6-Node
+Scenario-demand2_spot1 Scenario-demand2_spot1-Node
+Scenario-demand2_spot7 Scenario-demand2_spot7-Node
+Scenario-demand2_spot6 Scenario-demand2_spot6-Node
+ ;
+
+set StageVariables[FirstStage] := p_bilateral ;
+
+set StageVariables[SecondStage] := p_spot[*] ;
+
+param StageCost := FirstStage  StageCost
+SecondStage StageCost ;

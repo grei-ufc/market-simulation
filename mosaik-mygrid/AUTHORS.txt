@@ -1,0 +1,4 @@
+Authors
+=======
+
+This software was developed by Lucas Melo.

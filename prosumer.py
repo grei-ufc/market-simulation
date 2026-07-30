@@ -7,20 +7,24 @@ consumidora/produtora de energia, tais como:
 - Prosumer.
 """
 
-from random import uniform
+from random import uniform, randint, choice
 import datetime as dt
 import json
-import enlopy as el
 import numpy as np
+import pandas as pd
+
+from load_data import get_load_data, get_gen_data
+
 
 def generate_timeseries(start, time, step):
-    '''
+    """
         start = string em formato datetime: dd/mm/YYYY - hh:mm:ss
         time = tamanho da série temporal em segundos
         step = step de tempo em minutos
-    '''
+    """
     time_step = step * 60 # seconds
-    dt_start = dt.datetime.strptime(start, '%d/%m/%Y - %H:%M:%S')
+    #dt_start = dt.datetime.strptime(start, '%d/%m/%Y - %H:%M:%S')
+    dt_start = start
     delta = dt.timedelta(0, time)
 
     delta_sec = delta.days * (24 * 60 * 60) + delta.seconds
@@ -29,67 +33,96 @@ def generate_timeseries(start, time, step):
     # res_pp = [i.strftime('%D - %T') for i in res]
     return res
 
+
+
+def random_shiftable_load_generator(qtd=None,
+                                    demand_range=None,
+                                    frequency_range=None,
+                                    cycles_range=None):
+    """cria lista de cargas como esta:
+
+    loads = [{'id': 1, 'demand': 0.8, 'cycles': 20, 'frequency': 1},
+             {'id': 2, 'demand': 0.5, 'cycles': 5, 'frequency': 1},
+             {'id': 3, 'demand': 1.8, 'cycles': 2, 'frequency': 2},
+             {'id': 4, 'demand': 0.7, 'cycles': 5, 'frequency': 4}]"""
+    loads = []
+    for i in range(qtd):
+        load = {'id': i,
+                'demand': uniform(demand_range[0], demand_range[1]),
+                'cycles': randint(cycles_range[0], cycles_range[1]),
+                'frequency': randint(frequency_range[0], frequency_range[1])}
+        loads.append(load)
+
+    return loads
+
+def random_schedule_load_generator(loads=None, datetime=None):
+    """cria lista de agendamento de cargas
+    schedules = [{'id': 1,
+                  'start': dt.datetime.strptime('01/08/2019 - 02:00:00', '%d/%m/%Y - %H:%M:%S')},
+                 {'id': 2,
+                  'start': dt.datetime.strptime('01/08/2019 - 06:00:00', '%d/%m/%Y - %H:%M:%S')},
+                 {'id': 3,
+                  'start': dt.datetime.strptime('01/08/2019 - 08:00:00', '%d/%m/%Y - %H:%M:%S')},
+                 {'id': 4,
+                  'start': dt.datetime.strptime('01/08/2019 - 12:00:00', '%d/%m/%Y - %H:%M:%S')}
+                ]
+    """
+    schedules = []
+    times = generate_timeseries(datetime, 24 * 60 * 60, 15)
+    for load in loads:
+        schedule = {'id': load['id'], 'start': choice(times)}
+        schedules.append(schedule)
+    return schedules
+
+
 class ShiftableLoad(object):
 
-    OFF = 0
-    ON = 1
-
-    def __init__(self, datetime, start_datetime, demand, time_delta):
-        '''
+    def __init__(self, datetime, loads):
+        """
+            This are devices that can shift its operation in time within certain limits
             datetime = string em formato datetime: dd/mm/YYYY - hh:mm:ss
-            start_time = string em formato datetime: dd/mm/YYYY - hh:mm:ss
-            demand = valor de demanda da carga em kva
-            time_in_hours = time delta de tempo de execução da carga
-
-            ======= Script de Testes ================
-            datetimes = generate_timeseries('24/09/2018 - 00:00:00', 72*60*60, 5)
-            sl1 = ShiftableLoad('24/09/2018 - 00:00:00', '24/09/2018 - 10:00:00', 2.0, dt.timedelta(hours=0.5))
-            for datetime in datetimes:
-                sl1.step(datetime)
-        '''
+            loads = a list of dictonaries with values of shiftable loads demand in kW, number of 15min action
+                    cycles and it's frequency in days.
+                    loads = [{'id': 1, 'demand': 0.8, 'cycles': 4, 'frequency': 1}]
+        """
         self.datetime = datetime
-        self.start_datetime = start_datetime
-        self.demand = demand
-        self.time_delta = time_delta
-        self.status = self.OFF
-        self.executed_today = False
-        self.time_left_in_sec = self.time_delta.seconds
+        self.loads = pd.DataFrame(loads)
+        self.loads.set_index('id', inplace=True)
+        self.p_out = 0.0
 
+    def set_schedule(self, schedule_list):
+        for i in schedule_list:
+            i['end'] = i['start'] + self.loads.loc[i['id']]['cycles'] * dt.timedelta(minutes=15)
+            i['status'] = False
+        schedule_dt = pd.DataFrame(schedule_list).set_index('id')
+        self.loads = self.loads.join(schedule_dt)
+
+        # this ensure that the columns start and end
+        self.loads['start'] = pd.to_datetime(self.loads['start'])
+        self.loads['end'] = pd.to_datetime(self.loads['end'])
 
     def step(self, datetime, commands):
         demand = 0.0
-        delta_in_hours = 0.0
 
-        if self.status == self.OFF:
-            if datetime >= self.start_datetime and not self.executed_today:
-                self.status = self.ON
-            else:
-                if datetime.day == self.start_datetime.day and self.executed_today:
-                    self.executed_today = False
-                    self.time_left_in_sec = self.time_delta.seconds
+        start_loads = self.loads.loc[self.loads.start == datetime]
+        for index, row in start_loads.iterrows():
+            self.loads.at[index, 'status'] = True
+            # print('Load {} started........'.format(index))
 
-        if self.status == self.ON:
-            demand = self.demand
+        end_loads = self.loads.loc[self.loads.end == datetime]
+        for index, row in end_loads.iterrows():
+            self.loads.at[index, 'status'] = False
+            # FIX THIS
+            # self.loads.at[index, 'start'] += dt.timedelta(days=row['frequency'])
+            # self.loads.at[index, 'end'] += dt.timedelta(days=row['frequency']) + row['cycles'] * dt.timedelta(minutes=15)
+            # print('Load {} ended........'.format(index))
 
-            self.delta = datetime - self.datetime
-            if self.delta.seconds <= self.time_left_in_sec:
-                self.time_left_in_sec -= self.delta.seconds
-                delta_in_hours = self.delta.seconds / (60.0 * 60.0)
-            else:
-                delta_in_hours = self.time_left_in_sec / (60.0 * 60.0)
-                self.time_left_in_sec = 0
-                self.executed_today = True
-                self.start_datetime += dt.timedelta(hours=24)
-                self.status = self.OFF
-            
-        self.demand = round(demand, 2)
-        self.energy = round(self.demand * delta_in_hours, 2)
-        # energy = self.demand * (exec_time / (60.0 * 60.0))
-        
-        if demand != 0.0:
-            print('Load Executed: {:.2f} in {}'.format(energy, demand))
-        
-        return self.demand, 0.0
+        active_loads = self.loads.loc[self.loads.status == True]
+        for index, row in active_loads.iterrows():
+            demand += row['demand']
+
+        self.p_out = float(demand)
+        return self.p_out
 
 
 class UserLoad(object):
@@ -97,32 +130,44 @@ class UserLoad(object):
     de tempo retorna a demanda média de energia 
     para um determinado período de tempo.
     """
-    def __init__(self, datetime, user_daily_energy):
+    def __init__(self, datetime, max_dem_value, load_id=None):
 
-        self.demand = 0.0
+        self.p_out = 0.0
+        self.demand_forecast = 0.0
         self.datetime = datetime
+        self.load_id = load_id
+
+
+        # ============================================================
+        # ATENÇAO: Este trecho de código irá variar de acordo com 
+        # os dados que estão sendo utilizados
+        t_series = generate_timeseries(datetime, 1 * 24 * 60 * 60, 15)  # 1 dia segmentado em intervalos de 15 min.
 
         # definição da curva de carga do consumidor
-        self.load_curve = el.gen_daily_stoch_el(user_daily_energy)
+        data = get_load_data(load_index=self.load_id)
+        data = data[:24*4]
+        # normalizacao dos valores de carga retornados
+        data = (data-data.min())/(data.max()-data.min())
+        data = max_dem_value * data.values
+
+        self.load_curve = pd.DataFrame(data, index=t_series, columns=['pload', 'qload'])
+        # ============================================================
 
     def step(self, datetime, commands):
-        '''
-        '''
+        """
+        """
         time_delta = datetime - self.datetime
         delta_in_hours = time_delta.seconds / (60.0 * 60.0)
 
         self.datetime = datetime
-        self.demand = np.interp(datetime.hour + datetime.minute / 60.0,
-                                np.arange(24),
-                                self.load_curve)
-        self.energy = round(self.demand * delta_in_hours, 2)
-        
-        return self.demand, self.forecast(datetime)
+        self.p_out = self.load_curve['pload'][datetime]
+        self.energy = round(self.p_out * delta_in_hours, 2)
+
+        return float(self.p_out)
 
     def forecast(self, datetime):
-        datetime_list = [datetime + dt.timedelta(0, 15.0 * 60.0 + i * 60.0) for i in range(1, 16)]
-        hours = [round(i.hour + i.minute / 60.0, 2) for i in datetime_list]
-        self.demand_forecast = np.mean(np.interp(hours, np.arange(24), self.load_curve))
+        datetime_list = [datetime + dt.timedelta(0, 15.0 * 60.0 * i) for i in range(15)]
+        self.demand_forecast = np.mean(self.load_curve['pload'][datetime_list])
         self.energy_forecast = round(self.demand_forecast * 15.0 / 60.0, 2)
         return self.demand_forecast
 
@@ -131,7 +176,7 @@ class UserLoad(object):
 
 
 class DieselGeneration(object):
-    '''
+    """
         Descrição
         ----------
 
@@ -150,32 +195,7 @@ class DieselGeneration(object):
         e a poência atual entregue pelo gerador à rede elétrica, que pode 
         ser 0.0 caso o gerador encontre-se desligado ou igual sua potência
         nominal caso encontre-se desligado.
-
-        Script de Teste
-        ---------------
-        
-        import datetime as dt
-        import random
-        from prosumer import generate_timeseries
-
-        dt_start = dt.datetime.strptime('28/02/2019 - 00:00:00', '%d/%m/%Y - %H:%M:%S')
-        dg1 = DieselGeneration(dt_start,
-                               fuel_price=1.2*1e3,
-                               generator_fuel_rate=2933e3,
-                               generator_electrical_power=5.5e3,
-                               maintenance_cost_rate=0.5,
-                               add_startup_maintenance_cost=0.1,
-                               add_startup_fuel_use=0.001)
-                               
-        for t in generate_timeseries(start='28/02/2019 - 00:15:00', time=10*60*60, step=15):
-            status = random.choice([True, False])
-            marginal_cost = dg1.step(datetime=t, commands={'on_off': status})
-            if status:
-                print('gerador ligado')
-            else:
-                print('gerador desligado')    
-            print('US$ {}'.format(marginal_cost))
-    '''
+    """
     def __init__(self,
                  datetime,
                  fuel_price=0.0,
@@ -193,6 +213,8 @@ class DieselGeneration(object):
         self.maintenance_cost_rate = maintenance_cost_rate # in US$/h
         self.add_startup_maintenance_cost = add_startup_maintenance_cost # in US$
         self.add_startup_fuel_use = add_startup_fuel_use # in m3
+        self.p_out = 0.0
+        self.data = pd.DataFrame()
 
     def calc_marginal_cost(self, time, started):
         marg_cost = (self.generator_electrical_power * self.fuel_price)
@@ -212,6 +234,8 @@ class DieselGeneration(object):
         self.delta = datetime - self.datetime
         delta_in_hours = self.delta.seconds / (60.0 * 60.0)
         
+        self.p_out = 0.0
+
         if commands.get('on_off') is not None:
             self.on_off = commands['on_off']
         
@@ -221,12 +245,17 @@ class DieselGeneration(object):
         # =================================================
         marg_cost = self.calc_marginal_cost(0.25, self.on_off)
         self.datetime = datetime
-        
 
         if self.on_off is True:
-            return self.generator_electrical_power, marg_cost
-        elif self.on_off is not True:
-            return 0.0, marg_cost
+            self.p_out = self.generator_electrical_power
+
+        # self.data = self.data.append({'datetime': datetime,
+        #                               'state': self.on_off,
+        #                               'demand': demand,
+        #                               'marginal_cost': marg_cost},
+        #                               ignore_index=True)
+        
+        return - float(self.p_out)
 
 
 class PVGeneration(object):
@@ -234,33 +263,43 @@ class PVGeneration(object):
     de tempo retorna a produção média de energia 
     para um determinado período de tempo.
     """
-    def __init__(self, datetime, demand):
-        self.demand = demand
+    def __init__(self, datetime, max_gen_value, gen_id=None):
+
+        self.p_out = 0.0
+        self.demand_forecast = 0.0
         self.datetime = datetime
+        self.gen_id = gen_id
+
+        # ============================================================
+        # ATENÇÂO: Este trecho de código irá variar de acordo com 
+        # os dados que estão sendo utilizados
+        t_series = generate_timeseries(datetime, 1 * 24 * 60 * 60, 15)  # 1 dia segmentado em intervalos de 15 min.
+
+        # definição da curva de geração
+        data = get_gen_data(gen_index=self.gen_id)
+        data = data[:24*4]
+        # normalizacao dos valores de geracao retornados
+        data = (data-data.min())/(data.max()-data.min())
+        data = max_gen_value * data.values
+
+        self.gen_curve = pd.DataFrame(data, index=t_series, columns=['pgen'])
+        # ============================================================
 
     def step(self, datetime, commands):
-        delta_de_tempo = datetime - self.datetime
-        delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
+        """
+        """
+        time_delta = datetime - self.datetime
+        delta_in_hours = time_delta.seconds / (60.0 * 60.0)
         self.datetime = datetime
+        self.p_out = self.gen_curve['pgen'][datetime]
+        self.energy = round(self.p_out * delta_in_hours, 2)
 
-        if datetime.hour >= 18 or datetime.hour < 6:
-            self.demand = 0.0
-        else:
-            self.demand = round(uniform(0.2, 1.2), 3)
-        
-        self.energy = round(self.demand * delta_em_horas, 3)
-        
-        return - self.demand, - self.forecast(datetime)
+        return - float(self.p_out)
 
     def forecast(self, datetime):
-        if datetime.hour >= 18 or datetime.hour < 7:
-            self.power_forecast = 0.0
-        else:
-            self.power_forecast = round(uniform(0.2, 1.2), 3)
-
-        self.energy = round(self.power_forecast * 15.0 / 60.0, 3)
-        
-        return self.power_forecast
+        datetime_list = [datetime + dt.timedelta(0, 15.0 * 60.0 * i) for i in range(15)]
+        self.energy_forecast = round(self.demand_forecast * 15.0 / 60.0, 2)
+        return - self.demand_forecast
 
     def __repr__(self):
         return 'Generation'
@@ -287,121 +326,81 @@ class Storage(object):
     preço da lista será o preço máximo de compra de energia e o
     maior preço da lista será o preço mínimo de venda.
 
-
-    Script de Teste
-    ---------------
-
-    import datetime as dt
-    import random
-    from prosumer import generate_timeseries
-    dt_start = dt.datetime.strptime('28/02/2019 - 00:00:00', '%d/%m/%Y - %H:%M:%S')
-    sd1 = Storage(dt_start,
-                  storage_electrical_power=2.0e3,
-                  storage_capacity=30e3)
-
-    for t in generate_timeseries(start='28/02/2019 - 00:15:00', time=10*60*60, step=15):
-        commands= random.choice([{'energy_price': random.uniform(1.0, 3.0)}, {}])
-        power = sd1.step(datetime=t, commands=commands)
-        print('power delivered {} storage level: {}'.format(power, sd1.storage_charge_qtd))
-
     """
 
     def __init__(self,
                  datetime,
-                 storage_electrical_power,
-                 storage_capacity):
-        
-        self.storage_capacity = storage_capacity# in wh
-        self.storage_charge_qtd = 0.4 * storage_capacity # in wh
-        self.storage_minimum_backup = 0.2 * storage_capacity
-        self.storage_state = 'loading' # can be loading, unloading or waiting
-        self.storage_electrical_power = storage_electrical_power # in Watts
-        self.storage_charge_discharge_time = storage_capacity / storage_electrical_power # in hours
-        self.price_history_vector = list()
-        self.max_buy_price = None # in US$ 
-        self.min_sell_price = None # in US$
-        self.datetime = datetime
+                 storage_electrical_rate=0.1,
+                 storage_capacity=2.0,
+                 efficiency=1.0):
 
-    def calc_min_sell_and_max_buy_prices(self):
-        if len(self.price_history_vector) >= 20:
-            price_vector_sorted = list(self.price_history_vector)
-            price_vector_sorted.sort()
-            price_vector_sorted = price_vector_sorted[5:-5]
-            
-            self.max_buy_price = min(price_vector_sorted)
-            self.min_sell_price = max(price_vector_sorted)
-            
-            if len(self.price_history_vector) >= 50:
-                self.price_history_vector.pop(0)
-        else:
-            self.max_buy_price = sum(self.price_history_vector) / len(self.price_history_vector)
-            self.min_sell_price = 1.5 * self.max_buy_price
+        self.storage_capacity = storage_capacity  # in Wh
+        self.storage_energy_level = 0.5 * storage_capacity  # in Wh
+        self.storage_minimum_backup = 0.1 * storage_capacity
+        self.storage_state = 'charging'  # can be charging, discharging or floating
+        self.storage_electrical_power = storage_electrical_rate * storage_capacity  # in W in hours
+        self.efficiency = efficiency
+        self.datetime = datetime
+        self.p_out = 0.0
+        self.data = pd.DataFrame()
 
     def step(self, datetime, commands):
 
-        delta_de_tempo = datetime - self.datetime
-        delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
+        time_interval = datetime - self.datetime
+        t_interv_in_hours = time_interval.seconds / (60.0 * 60.0)
         self.datetime = datetime
 
-        prices = tuple([self.max_buy_price, self.min_sell_price])
-
-        # verifica se existe comando de preço, se não houver,
-        # continua no estado definido anteriormente
-        if commands.get('energy_price') is not None:
-
-            self.price_history_vector.append(commands['energy_price'])
-            self.calc_min_sell_and_max_buy_prices()
-
-            if commands['energy_price'] < self.max_buy_price:
-                # compra energia
-                self.calc_min_sell_and_max_buy_prices()
-                if self.storage_charge_qtd < self.storage_capacity:
-                    energy_buyed = self.storage_electrical_power * delta_em_horas
-                    self.storage_charge_qtd += energy_buyed
-                    self.storage_state = 'loading'
-
-                    return self.storage_electrical_power, prices
-                else:
-                    return 0.0, prices
-
-            elif commands['energy_price'] > self.max_buy_price and commands['energy_price'] < self.min_sell_price:
-                # bateria em estado de espera
-                self.calc_min_sell_and_max_buy_prices()
-                self.storage_state = 'waiting'
-                return 0.0, prices
-
-            elif commands['energy_price'] > self.min_sell_price:
-                # vende energia
-                self.calc_min_sell_and_max_buy_prices()
-                if self.storage_charge_qtd > self.storage_minimum_backup:
-                    energy_selled = self.storage_electrical_power * delta_em_horas
-                    self.storage_charge_qtd -= energy_selled
-                    self.storage_state = 'unloading'
-                    return - self.storage_electrical_power, prices
-                else:
-                    return 0.0, prices
+        self.p_out
+        if commands.get('storage_mode') != None:
+            self.p_out = commands['power_level']
         else:
-            if self.storage_state == 'loading':
-                # compra energia
-                if self.storage_charge_qtd < self.storage_capacity:
-                    energy_buyed = self.storage_electrical_power * delta_em_horas
-                    self.storage_charge_qtd += energy_buyed
-                    return self.storage_electrical_power, prices
-                else:
-                    return 0.0, prices
+            pass 
 
-            elif self.storage_state == 'waiting':
-                # bateria em estado de espera
-                return 0.0, prices
+        # verifica se existe comando para a bateria,
+        # se não houver continua no estado definido
+        # anteriormente
+        # if commands.get('storage_mode') != None:
+        #     if commands['storage_mode'] == 'charge':
+                
+        #         if self.storage_energy_level < self.storage_capacity:
+        #             energy = self.storage_electrical_power * t_interv_in_hours
+        #             self.storage_energy_level += (energy * self.efficiency)
+        #             self.storage_state = 'charging'
+        #             self.p_out = commands['power_level']
+        #         else:
+        #             self.p_out = 0.0
+        #     elif commands['storage_mode'] == 'discharge':
+        #         if self.storage_energy_level > self.storage_minimum_backup:
+        #             energy = self.storage_electrical_power * t_interv_in_hours
+        #             self.storage_energy_level -= (energy * self.efficiency)
+        #             self.storage_state = 'discharging'
+        #             self.p_out = commands['power_level']
+        #         else:
+        #             self.p_out = 0.0
+        #     elif commands['storage_mode'] == 'float':
+        #         self.storage_state = 'floating'
+        #         self.p_out = 0.0
+        # else:
+        #     if self.storage_state == 'charging':
+        #         if self.storage_energy_level < self.storage_capacity:
+        #             energy = self.storage_electrical_power * t_interv_in_hours
+        #             self.storage_energy_level += (energy * self.efficiency)
+        #             self.p_out = commands['power_level']
+        #         else:
+        #             self.p_out = 0.0
 
-            elif self.storage_state == 'unloading':
-                # vende energia
-                if self.storage_charge_qtd > self.storage_minimum_backup:
-                    energy_selled = self.storage_electrical_power * delta_em_horas
-                    self.storage_charge_qtd -= energy_selled
-                    return - self.storage_electrical_power, prices
-                else:
-                    return 0.0, prices
+        #     elif self.storage_state == 'floating':
+        #         self.p_out = 0.0
+
+        #     elif self.storage_state == 'discharging':
+        #         if self.storage_energy_level > self.storage_minimum_backup:
+        #             energy = self.storage_electrical_power * t_interv_in_hours
+        #             self.storage_energy_level -= (energy * self.efficiency)
+        #             self.p_out = commands['power_level']
+        #         else:
+        #             self.p_out = 0.0
+
+        return float(self.p_out)
 
     def __repr__(self):
         return 'Storage'
@@ -411,10 +410,10 @@ class BufferingDevice(object):
 
     def __init__(self, datetime, demand):
         self.datetime = datetime
-        self.demand = demand
+        self.p_out = demand
 
     def step(self, datetime, commands):
-        return 0.0, 0.0
+        return self.p_out
 
 
 class Prosumer(object):
@@ -423,8 +422,8 @@ class Prosumer(object):
     utilizando para isso instâncias das demais classes
     deste módulo, tais como Load, Generation e Storage
     """
-    def __init__(self, datetime, name, config):
-        '''
+    def __init__(self, datetime, name, param_dict):
+        """
             config is a dictionary like this:
             {
                 'stochastic_gen': {
@@ -439,14 +438,14 @@ class Prosumer(object):
                 'storage_device': {
                     'value': value
                 }
-                'freely_control_gem': {
+                'freely_control_gen': {
                     'value': value
                 }
                 'user_action_device': {
                     'value': value
                 }
             }
-        '''
+        """
         self.datetime = datetime
         self.name = name
         self.prosumer_id = int(name.split('_')[1])
@@ -454,9 +453,10 @@ class Prosumer(object):
         self.shiftable_load = None
         self.buffering_device = None
         self.storage_device = None
-        self.freely_control_gem = None
+        self.freely_control_gen = None
         self.user_action_device = None
-
+        self.p_out = 0.0
+        self.demand = 0.0
 
         # =================================================
         # inicialização dos objetos que representam o
@@ -464,149 +464,151 @@ class Prosumer(object):
         # condições pré-estabelecidas
         # =================================================
 
-        self.device_status = dict()
-        for device_name, device_values in config.items():
+        self.prosumer_entity_data = {
+            'eid': self.name,
+            'type': 'Prosumer',
+            'rel': [],
+            'children': [],
+        }
+
+        # TODO: set the params values in config.json and set them in devices objects
+
+        for device_name, device_params in param_dict.items():
             if device_name == 'stochastic_gen':
                 self.stochastic_gen = PVGeneration(datetime=datetime,
-                                                   demand=device_values['value'])
-                self.device_status['stochastic_gen'] = {'status': 1,
-                                                        'power': 0.0}
+                                                   max_gen_value=device_params['size'],
+                                                   gen_id=self.prosumer_id)
+
+                child = {
+                    'eid': '{}:stochastic_gen'.format(self.name),
+                    'type': 'PVGeneration',
+                }
+                self.prosumer_entity_data['children'].append(child)
 
             elif device_name == 'shiftable_load':
                 start_datetime = datetime + dt.timedelta(hours=int(uniform(5, 22)))
+
+                loads = random_shiftable_load_generator(qtd=randint(1, 5),
+                                                        demand_range=(0.5, 1.2),
+                                                        frequency_range=(1, 5),
+                                                        cycles_range=(2, 6))
+
+                schedules = random_schedule_load_generator(loads, datetime)
+
                 self.shiftable_load = ShiftableLoad(datetime=datetime,
-                                                    start_datetime=start_datetime,
-                                                    demand=device_values['value'],
-                                                    time_delta=dt.timedelta(hours=0.5))
-                self.device_status['shiftable_load'] = {'status': 0,
-                                                        'power': 0.0}
+                                                    loads=loads)
+                self.shiftable_load.set_schedule(schedules)
+
+                child = {
+                    'eid': '{}:shiftable_load'.format(self.name),
+                    'type': 'ShiftableLoad',
+                }
+                self.prosumer_entity_data['children'].append(child)
 
             elif device_name == 'buffering_device':
                 self.buffering_device = BufferingDevice(datetime=datetime,
-                                                        demand=device_values['value'])
-                self.device_status['buffering_device'] = {'status': 0,
-                                                          'power': 0.0}
+                                                        demand=device_params['size'])
+                child = {
+                    'eid': '{}:buffering_device'.format(self.name),
+                    'type': 'BufferingDevice',
+                }
+                self.prosumer_entity_data['children'].append(child)
 
             elif device_name == 'storage_device':
-                
-                storage_el_power = device_values['value']
-                
+
+                storage_size = device_params['size']
+
                 self.storage_device = Storage(datetime=datetime,
-                                              storage_electrical_power=storage_el_power,
-                                              storage_capacity=30e3)
-                self.device_status['storage_device'] = {'status': 0,
-                                                        'power': 0.0}
+                                              storage_electrical_rate=0.05,
+                                              storage_capacity=2.0)
+                child = {
+                    'eid': '{}:storage_device'.format(self.name),
+                    'type': 'Storage',
+                }
+                self.prosumer_entity_data['children'].append(child)
 
-            elif device_name == 'freely_control_gem':
+            elif device_name == 'freely_control_gen':
 
-                gen_el_power = device_values['value']
-                
-                self.freely_control_gem = DieselGeneration(datetime=datetime,
-                                                           fuel_price=1.2*1e3,
+                gen_el_power = device_params['size']
+
+                self.freely_control_gen = DieselGeneration(datetime=datetime,
+                                                           fuel_price=1.2 * 1e3,
                                                            generator_fuel_rate=2933e3,
                                                            generator_electrical_power=gen_el_power,
                                                            maintenance_cost_rate=0.5,
                                                            add_startup_maintenance_cost=0.1,
                                                            add_startup_fuel_use=0.001)
-                self.device_status['freely_control_gem'] = {'status': 0,
-                                                            'power': 0.0}
+                child = {
+                    'eid': '{}:freely_control_gen'.format(self.name),
+                    'type': 'DieselGeneration',
+                }
+                self.prosumer_entity_data['children'].append(child)
 
             elif device_name == 'user_action_device':
                 self.user_action_device = UserLoad(datetime=datetime,
-                                                   user_daily_energy=device_values['value'])
-                self.device_status['user_action_device'] = {'status': 1,
-                                                            'power': 0.0}
-
-        # mosaik simulation controller params
-        self.demand = 0.0
-        self.power_forecast = 0.0
+                                                   max_dem_value=device_params['size'],
+                                                   load_id=self.prosumer_id)
+                child = {
+                    'eid': '{}:user_action_device'.format(self.name),
+                    'type': 'UserLoad',
+                }
+                self.prosumer_entity_data['children'].append(child)
 
     def step(self, datetime, input_):
-        '''
-        {
-            'commands': {
-                'ProsumerAgent_4': {
-                    'stochastic_gen': {'power': 5.41, 'status': None, 'demand': None},
-                    'shiftable_load': {'power': 2.02, 'status': None, 'demand': None},
-                    'buffering_device': {'power': 2.1, 'status': None, 'demand': None},
-                    'user_action_device': {'power': 5.55, 'status': None, 'demand': None}
-                }.
-            }
-        }
-        '''
+        """
+        """
 
-        delta_de_tempo = datetime - self.datetime
-        delta_em_horas = delta_de_tempo.seconds / (60.0 * 60.0)
+        time_interval = datetime - self.datetime
+        t_interv_in_hours = time_interval.seconds / (60.0 * 60.0)
 
         self.datetime = datetime
-        self.demand = 0.0
-        self.forecast = 0.0
-
+        self.p_out = 0.0
         # =================================================
-        # realiza previsão de demanda (+/-) de cada um dos
-        # dispositivos não controláveis e calcula outros
-        # parâmetros importantes de dispositivos controlá-
-        # veis para formãção de suas curvas de oferta.
+        # Realiza cálculo de demanda (+/-) de cada um dos
+        # dispositivos.
         #
         # Também realiza ajustes nas configurações dos
         # dispositivos de acordo com os comandos enviados
         # pelo agente device.
         # =================================================
-        if not input_:
-            return
-
-        commands = input_['commands']['ProsumerAgent_' + str(self.prosumer_id)]
-        # ok
         if self.stochastic_gen is not None:
-            d, f = self.stochastic_gen.step(datetime, commands['stochastic_gen'])
-            self.device_status['stochastic_gen']['power'] = d
-            self.device_status['stochastic_gen']['forecast'] = f
-            # self.demand += d
-            # self.forecast += f
-        # ok
+            if input_:
+                power = self.stochastic_gen.step(datetime, input_['stochastic_gen'])
+            else:
+                power = self.stochastic_gen.step(datetime, {})
+            self.p_out += power
         if self.user_action_device is not None:
-            d, f = self.user_action_device.step(datetime, commands['user_action_device'])
-            self.device_status['user_action_device']['power'] = d
-            self.device_status['user_action_device']['forecast'] = f
-            # self.demand += d
-            # self.forecast += f
-        # the output it's the marginal cost and the power delivered
-        if self.freely_control_gem is not None:
-            power, marginal_cost = self.freely_control_gem.step(datetime, commands['freely_control_gem'])
-            self.device_status['freely_control_gem']['power'] = d
-            self.device_status['freely_control_gem']['marginal_cost'] = marginal_cost
-            # self.demand += d
-            # self.forecast += f
-        # informar autonomia
+            if input_:
+                power = self.user_action_device.step(datetime, input_['user_action_device'])
+            else:
+                power = self.user_action_device.step(datetime, {})
+            self.p_out += power
+        if self.freely_control_gen is not None:
+            if input_:
+                power = self.freely_control_gen.step(datetime, input_['freely_control_gen'])
+            else:
+                power = self.freely_control_gen.step(datetime, {})
+            # self.p_out += power
         if self.storage_device is not None:
-            power, prices = self.storage_device.step(datetime, commands['storage_device'])
-            self.device_status['storage_device']['power'] = d
-            self.device_status['storage_device']['prices'] = prices
-            # self.demand += d
-            # self.forecast += f
-        # informar ciclos de carga executados e pendentes
+            if input_:
+                power = self.storage_device.step(datetime, input_['storage_device'])
+            else:
+                power = self.storage_device.step(datetime, {'power_level': 0.0})
+            self.p_out += power
         if self.shiftable_load is not None:
-            d, f = self.shiftable_load.step(datetime, commands['shiftable_load'])
-            self.device_status['shiftable_load']['power'] = d
-            self.device_status['shiftable_load']['forecast'] = f
-            # self.demand += d
-            # self.forecast += f
-        # not defined
+            if input_:
+                power = self.shiftable_load.step(datetime, input_['shiftable_load'])
+            else:
+                power = self.shiftable_load.step(datetime, {})
+            # self.p_out += power
         if self.buffering_device is not None:
-            d, f = self.buffering_device.step(datetime, commands['buffering_device'])
-            self.device_status['buffering_device']['power'] = d
-            self.device_status['buffering_device']['forecast'] = f
-            # self.demand += d
-            # self.forecast += f
+            if input_:
+                power = self.buffering_device.step(datetime, input_['buffering_device'])
+            else:
+                power = self.buffering_device.step(datetime, {})
+            # self.p_out += power
 
-    def forecast(self, datetime):
-        self.load.forecast(datetime)
-        if self.has_der:
-            self.generation.forecast(datetime)
-            self.power_forecast = self.load.demand_forecast - self.generation.power_forecast
-        else:
-            self.power_forecast = self.load.demand_forecast
-
+        self.p_out = round(self.p_out, 4)
 
     def __repr__(self):
         return 'Prosumer: {}'.format(self.name)
@@ -618,76 +620,131 @@ class Simulator(object):
     para cada passo de tempo de simulação.
     """
     def __init__(self, start_datetime):
+        """
+            self.prosumers: It's a dictionary with all prosumers created according with parameters
+            in passed in add_prosumers method.
+            sel.data: 
+            self.start_datetime: A datetime object made with a string with the start date 
+                in the format dd/mm/YYYY - hh:mm:ss  
+        """
         self.prosumers = dict()
-        self.data = list()
         self.start_datetime = dt.datetime.strptime(start_datetime, '%d/%m/%Y - %H:%M:%S')
 
-    def add_prosumers(self, configs):
-        for node, config in configs.items():
+    def add_prosumers(self, config_dict):
+        """Inits the prosumers
+
+        This method initiate the prosumers getting as input arg a dictionary with
+        the following format:
+        
+            {
+            '1': {
+                'stochastic_gen': param_dict,
+                'shiftable_load': param_dict
+                 ....
+                 }
+            '2': {
+                'stochastic_gen': param_dict,
+                'shiftable_load': param_dict,
+                 ....
+                 }
+            ....
+            }
+        """
+
+        #
+
+        entity_list = []
+        for node, param_dict in config_dict.items():
             name = 'Prosumer_{}'.format(node)
-            prosumer = Prosumer(self.start_datetime, name, config)
+            """ To inicialize the Prosumer class it's necessary
+             a dictionary in this format:
+                {
+                    'stochastic_gen': {'value': value },
+                    'shiftable_load': {'value' : value},
+                    ...
+                }
+            """
+            prosumer = Prosumer(self.start_datetime, name, param_dict)
             self.prosumers[name] = prosumer
-            self.data.append([])
+            entity_list.append(prosumer.prosumer_entity_data)
+
+        return entity_list
 
     def step(self, time, inputs):
-
-        '''The inputs dictionary has the folowing form:
-            {'Prosumer_4': {
-                'commands': {
-                    'ProsumerAgent_4': {
-                        'stochastic_gen': {'power': 5.41, 'status': None, 'demand': None},
-                        'shiftable_load': {'power': 2.02, 'status': None, 'demand': None},
-                        'buffering_device': {'power': 2.1, 'status': None, 'demand': None},
-                        'user_action_device': {'power': 5.55, 'status': None, 'demand': None}
-                    }
-                }
-            },
-            'Prosumer_6': {
-                'commands': {
-                    'ProsumerAgent_6': {
-                        'shiftable_load': {'power': 0.03, 'status': None, 'demand': None},
-                        'buffering_device': {'power': 2.41, 'status': None, 'demand': None},
-                        'user_action_device': {'power': 1.82, 'status': None, 'demand': None}
-                    }
-                }
-            },
-            ...
-        }
-        '''
+        """
+        """
 
         delta = dt.timedelta(0, time)
         datetime = self.start_datetime + delta
         for prosumer_name, prosumer in self.prosumers.items():
-            prosumer.step(datetime, inputs.get(prosumer_name))
-            
-            # ================================
-            # PRIORIDADE PARA FIX!
-            # ================================
-
-            # data = {'datetime': datetime.strftime('%D - %T'),
-            #         'demand': 0.0}
-            # self.data[prosumer_name].append(data)
+            _inputs = {}
+            for dest_eid, attrs in inputs.items():
+                if prosumer_name in dest_eid:
+                    try:
+                        prosumer_eid, device_name = dest_eid.split(':')
+                        _inputs[device_name] = list(attrs['commands'].values())[0]
+                    except ValueError:
+                        pass
+            prosumer.step(datetime, _inputs)
 
 
 def main():
+    """This is a test method.
 
-    start = '14/03/2018 - 00:00:00'
+    This method aims to test some functionalities in
+    the classes defined in this module.
+    """
+    # -------------------------------------------
+    # Carrega as configurações de simulação
+    # e inicializa os prosumers e seus devices
+    # -------------------------------------------
+
+    start = '01/10/2019 - 00:00:00'
     sim = Simulator(start_datetime=start)
-    for i in range(5):
-        sim.add_prosumer()
 
-    time_step = 15 * 60 # seconds
-    time = 1 * 60 * 60
-    delta = dt.timedelta(0, time)
-    delta_sec = delta.days * (24 * 60 * 60) + delta.seconds
-    
-    for i in range(0, delta_sec, time_step):
-        sim.step(i)
+    # carrega o arquivo de configuracao config.json
+    # e monta o dicionario com os parametros de cada
+    # um dos prosumers
+    config_file = json.load(open('config.json'))
+    # Cria dicionario da seguinte forma:
+    """{
+        '1': {
+            'stochastic_gen': {'value': 2.1},
+            'shiftable_load': {'value': 1.2},
+             ....
+             }
+        '2': {
+            'stochastic_gen': {'value': 2.1},
+            'shiftable_load': {'value': 1.2},
+             ....
+             }
+        ....
+        }
+    """
+    config_dict = {str(i): {} for i in config_file['nodes_lv']}
+    for i, j in config_file['devices'].items():
+        for k, w in j['powers'].items():
+            config_dict[k][i] = {'value': w}
 
-    for i, inst in enumerate(sim.data):
-        print('%d: %s' % (i, inst))
+    sim.add_prosumers(config_dict)
+
+    # -------------------------------------------
+    # Configura e executa o Loop de passos
+    # de simulação
+    # -------------------------------------------
+
+    # parametros de tempo de simulação e de passo de tempo
+    time = 5 * 24 * 60 * 60  # 5 dias
+    time_step = 15 * 60  # 15 minutos
+    delta = dt.timedelta(minutes=15)
+    delta_sec = delta.days * time + delta.seconds
+
+    from tqdm import tqdm
+    from time import sleep
+    for i in tqdm(range(0, delta_sec, time_step)):
+        sleep(0.05)
+        sim.step(time=i, inputs={})
 
 
 if __name__ == '__main__':
     main()
-

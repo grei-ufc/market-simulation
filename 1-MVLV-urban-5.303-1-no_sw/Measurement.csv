@@ -1,0 +1,46 @@
+id;element1;element2;variable;subnet;voltLvl
+MV3.101 Measurement 2;HV1 Bus 25;NULL;v;HV1_MV3.101;3
+MV3.101 Measurement 3;MV3.101 BS busbar1A;NULL;v;MV3.101;5
+MV3.101 Measurement 4;MV3.101 node1;HV1-MV3.101-Trafo1;p;MV3.101;4
+MV3.101 Measurement 5;MV3.101 node1;HV1-MV3.101-Trafo2;p;MV3.101;4
+MV3.101 Measurement 6;MV3.101 node1;HV1-MV3.101-Trafo1;q;MV3.101;4
+MV3.101 Measurement 7;MV3.101 node1;HV1-MV3.101-Trafo2;q;MV3.101;4
+MV3.101 Measurement 8;MV3.101 node1;HV1-MV3.101-Trafo1;i;MV3.101;4
+MV3.101 Measurement 9;MV3.101 node1;HV1-MV3.101-Trafo2;i;MV3.101;4
+MV3.101 Measurement 10;MV3.101 Bus 26;MV3.101 Line 16;p;MV3.101_Feeder3;5
+MV3.101 Measurement 11;MV3.101 Bus 53;MV3.101 Line 43;p;MV3.101_Feeder6;5
+MV3.101 Measurement 12;MV3.101 Bus 69;MV3.101 Line 59;p;MV3.101_Feeder7;5
+MV3.101 Measurement 13;MV3.101 node1;NULL;v;MV3.101;5
+MV3.101 Measurement 14;MV3.101 Bus 70;MV3.101 Line 60;p;MV3.101_Feeder7;5
+MV3.101 Measurement 15;MV3.101 Bus 90;MV3.101 Line 80;p;MV3.101_Feeder8;5
+MV3.101 Measurement 16;MV3.101 Bus 91;MV3.101 Line 81;p;MV3.101_Feeder8;5
+MV3.101 Measurement 17;MV3.101 Bus 99;MV3.101 Line 89;p;MV3.101_Feeder9;5
+MV3.101 Measurement 18;MV3.101 Bus 100;MV3.101 Line 90;p;MV3.101_Feeder9;5
+MV3.101 Measurement 19;MV3.101 Bus 133;MV3.101 Line 123;p;MV3.101_Feeder13;5
+MV3.101 Measurement 20;MV3.101 Bus 134;MV3.101 Line 124;p;MV3.101_Feeder13;5
+MV3.101 Measurement 21;MV3.101 Bus 18_1;MV3.101 loop_line 1;p;MV3.101_Loop_Line;5
+MV3.101 Measurement 22;MV3.101 Bus 50_1;MV3.101 loop_line 2;p;MV3.101_Loop_Line;5
+MV3.101 Measurement 23;MV3.101 Bus 26;MV3.101 Line 16;q;MV3.101_Feeder3;5
+MV3.101 Measurement 25;MV3.101 Bus 53;MV3.101 Line 43;q;MV3.101_Feeder6;5
+MV3.101 Measurement 26;MV3.101 Bus 69;MV3.101 Line 59;q;MV3.101_Feeder7;5
+MV3.101 Measurement 27;MV3.101 Bus 70;MV3.101 Line 60;q;MV3.101_Feeder7;5
+MV3.101 Measurement 28;MV3.101 Bus 90;MV3.101 Line 80;q;MV3.101_Feeder8;5
+MV3.101 Measurement 29;MV3.101 Bus 91;MV3.101 Line 81;q;MV3.101_Feeder8;5
+MV3.101 Measurement 30;MV3.101 Bus 99;MV3.101 Line 89;q;MV3.101_Feeder9;5
+MV3.101 Measurement 31;MV3.101 Bus 100;MV3.101 Line 90;q;MV3.101_Feeder9;5
+MV3.101 Measurement 32;MV3.101 Bus 133;MV3.101 Line 123;q;MV3.101_Feeder13;5
+MV3.101 Measurement 33;MV3.101 Bus 134;MV3.101 Line 124;q;MV3.101_Feeder13;5
+MV3.101 Measurement 34;MV3.101 Bus 18_1;MV3.101 loop_line 1;q;MV3.101_Loop_Line;5
+MV3.101 Measurement 36;MV3.101 Bus 50_1;MV3.101 loop_line 2;q;MV3.101_Loop_Line;5
+MV3.101 Measurement 37;MV3.101 Bus 69;NULL;v;MV3.101_LV6.320;5
+MV3.101 Measurement 38;MV3.101 Bus 70;NULL;v;MV3.101_LV6.321;5
+MV3.101 Measurement 39;MV3.101 Bus 90;NULL;v;MV3.101_LV5.332;5
+MV3.101 Measurement 40;MV3.101 Bus 99;NULL;v;MV3.101_LV5.335;5
+MV3.101 Measurement 41;MV3.101 Bus 69;NULL;p;MV3.101_LV6.320;5
+MV3.101 Measurement 42;MV3.101 Bus 70;NULL;p;MV3.101_LV6.321;5
+MV3.101 Measurement 43;MV3.101 Bus 90;NULL;p;MV3.101_LV5.332;5
+MV3.101 Measurement 44;MV3.101 Bus 99;NULL;p;MV3.101_LV5.335;5
+MV3.101 Measurement 45;MV3.101 Bus 69;NULL;q;MV3.101_LV6.320;5
+MV3.101 Measurement 47;MV3.101 Bus 70;NULL;q;MV3.101_LV6.321;5
+MV3.101 Measurement 48;MV3.101 Bus 90;NULL;q;MV3.101_LV5.332;5
+MV3.101 Measurement 49;MV3.101 Bus 99;NULL;q;MV3.101_LV5.335;5

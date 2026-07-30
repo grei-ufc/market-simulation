@@ -4,6 +4,7 @@
     ],
     "port": 1234,
     "num": 1,
+    "mode": "simulation",
     "pade_ams": {
         "launch": true,
         "host": "localhost",
@@ -15,7 +16,7 @@
         "port": 5000
     },
     "pade_sniffer": {
-        "active": true,
+        "active": false,
         "host": "localhost",
         "port": 8001
     },
